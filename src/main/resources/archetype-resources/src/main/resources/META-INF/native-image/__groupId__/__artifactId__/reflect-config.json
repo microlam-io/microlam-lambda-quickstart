@@ -1,0 +1,23 @@
+[
+{
+  "name":"${package}.bs.BusinessProcessorMult"}
+,
+{
+  "name":"${package}.bs.BusinessProcessorSum"}
+,
+{
+  "name":"${package}.lambda.${lambdaName}",
+  "methods":[{"name":"<init>","parameterTypes":[] }]}
+,
+{
+  "name":"${package}.lambda.body.LambdaBodyIn",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true}
+,
+{
+  "name":"${package}.lambda.body.LambdaBodyOut",
+  "allDeclaredFields":true,
+  "allDeclaredMethods":true,
+  "allDeclaredConstructors":true}
+]

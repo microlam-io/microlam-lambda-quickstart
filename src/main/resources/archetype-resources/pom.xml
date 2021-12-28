@@ -1,0 +1,434 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}</artifactId>
+  <version>${version}</version>
+  
+ <properties>
+	<release.version>11</release.version>
+	<exec.mainClass>com.amazonaws.services.lambda.runtime.api.client.AWSLambda</exec.mainClass>
+	<lambda.handler>${package}.lambda.${lambdaName}</lambda.handler>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <junit.version>4.12</junit.version>
+  </properties>
+
+	<build>
+		<plugins>
+		  <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-compiler-plugin</artifactId>
+	        <version>3.8.0</version>
+	        <configuration>
+			  <release>${release.version}</release>
+<!--
+	          <source>1.8</source>
+		      <target>1.8</target>
+-->
+	          <encoding>UTF-8</encoding>
+	          <forceJavacCompilerUse>true</forceJavacCompilerUse>
+	        </configuration>
+	      </plugin>
+
+		</plugins>
+	</build>
+
+
+  <dependencyManagement>
+    <dependencies>
+ 
+	<dependency>
+      <groupId>io.microlam</groupId>
+      <artifactId>microlam-bom</artifactId>
+      <version>0.2</version>
+      <type>pom</type>
+      <scope>import</scope>
+    </dependency>
+
+  </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+  
+    <dependency>
+	  <groupId>io.microlam</groupId>
+  	  <artifactId>microlam-aws-lambda</artifactId>
+	</dependency>
+  
+  	<dependency>
+	  <groupId>com.google.code.gson</groupId>
+  	  <artifactId>gson</artifactId>
+	</dependency>
+  
+	<dependency>
+	    <groupId>io.netty</groupId>
+	    <artifactId>netty-codec</artifactId>
+	</dependency>
+
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    
+    <dependency>
+    	<groupId>io.microlam</groupId>
+    	<artifactId>slf4j-simple-lambda</artifactId>
+	</dependency>
+      
+ 	<dependency>
+ 		<groupId>org.slf4j</groupId>
+ 		<artifactId>log4j-over-slf4j</artifactId>
+ 	</dependency>
+    
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-events</artifactId>
+   </dependency>
+    
+    <dependency>
+      <groupId>io.microlam</groupId>
+      <artifactId>microlam-aws-devops</artifactId>
+	  <version>0.3</version>
+	  <scope>test</scope>
+    </dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>auth</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>aws-core</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>regions</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>s3</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>lambda</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+		<groupId>junit</groupId>
+		<artifactId>junit</artifactId>
+	</dependency>
+
+  </dependencies>
+
+    <profiles>
+
+      <profile>
+        <id>java</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+
+		<build>
+			<plugins>
+				<!-- Necessary for Generating the Lambda java deployment package -->
+				<plugin>
+		            <artifactId>maven-assembly-plugin</artifactId>
+			        <dependencies>
+			          <dependency>
+			            <groupId>io.microlam</groupId>
+			            <artifactId>microlam-assembly-descriptor</artifactId>
+			            <version>1.3</version>
+			          </dependency>
+			        </dependencies>
+		
+		            <configuration>
+					  <descriptorRefs>
+		                <descriptorRef>aws-lambda</descriptorRef>
+		              </descriptorRefs>
+		            </configuration>
+		            <executions>
+		                <execution>
+		                    <id>aws-lambda-deployment-package</id>
+		                    <phase>package</phase>
+		                    <goals>
+		                        <goal>single</goal>
+		                    </goals>
+		                </execution>
+		            </executions>
+		        </plugin>
+			</plugins>
+		</build>
+     </profile>
+
+      <profile>
+        <id>native</id>
+        <activation>
+          <activeByDefault>false</activeByDefault>
+        </activation>
+
+		<dependencies>
+
+		    <dependency>
+		      <groupId>com.amazonaws</groupId>
+		      <artifactId>aws-lambda-java-core</artifactId>
+		    </dependency>
+
+			<dependency>
+			   <groupId>com.amazonaws</groupId>
+			   <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
+			</dependency>
+
+			<dependency>
+			    <groupId>io.microlam</groupId>
+				<artifactId>aws-lambda-java-runtime-interface-client-native-config</artifactId>
+			</dependency>
+
+		</dependencies>
+
+		<build>
+			<plugins>
+				<plugin>
+				    <groupId>org.apache.maven.plugins</groupId>
+				    <artifactId>maven-jar-plugin</artifactId>
+				    <version>3.2.0</version>
+				    <configuration>
+				        <archive>
+				            <manifest>
+				                <addClasspath>true</addClasspath>
+				                <classpathPrefix>libs/</classpathPrefix>
+				                <mainClass>${exec.mainClass}</mainClass>
+				            </manifest>
+				        </archive>
+				    </configuration>
+				</plugin>
+			</plugins>
+		</build>
+      </profile>
+	  <profile>
+        <id>config</id>
+        <activation>
+        <activeByDefault>false</activeByDefault>
+        </activation>
+		<build>
+			<plugins>
+		<plugin>
+         <groupId>io.fabric8</groupId>
+         <artifactId>docker-maven-plugin</artifactId>
+         <version>0.38.0</version>
+
+			<executions>
+			  <execution>
+			    <id>docker-build</id>
+			    <goals>
+			       <goal>build</goal>
+			    </goals>
+			  </execution>
+			</executions>
+
+            <configuration>
+                <verbose>true</verbose>
+				<createContainers>true</createContainers>
+
+                <images>
+                    <image>
+                        <name>native-config</name>
+
+                        <build>
+
+                            <!-- This is the same FROM used in a Dockerfile -->
+							<!--
+                            <from>ghcr.io/graalvm/graalvm-ce:java11-21</from>
+							<workdir>function</workdir>
+							<runCmds>
+								<runCmd>gu install native-image</runCmd>
+								<runCmd>curl -4 -L https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie -o /usr/bin/aws-lambda-rie</runCmd>
+								<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
+							</runCmds>
+							-->
+							
+							<from>ghcr.io/microlam-io/microlam-container:java11-graalvm21</from>
+							<workdir>function</workdir>
+                        	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
+                            <entryPoint>
+                                <exec>
+                                    <arg>/usr/bin/aws-lambda-rie</arg>
+                                    <arg>java</arg>
+									<arg>-agentlib:native-image-agent=config-merge-dir=/function/config/,config-write-period-secs=30,config-write-initial-delay-secs=5</arg>
+                                    <arg>-jar</arg>
+                                    <arg>${project.artifactId}-${project.version}.jar</arg>
+									<arg>${lambda.handler}</arg>
+                                </exec>
+                            </entryPoint>
+
+								<assembly>
+								  <name>function</name>
+								  <inline>
+									    <dependencySets>
+									        <dependencySet>
+									        	<useProjectArtifact>true</useProjectArtifact>
+									            <includes>
+													<include>${project.groupId}:${project.artifactId}</include>
+												</includes>
+									        </dependencySet>
+									    
+									        <dependencySet>
+									            <outputDirectory>libs</outputDirectory>
+									            <useProjectArtifact>false</useProjectArtifact>
+									        </dependencySet>
+									    </dependencySets>
+								  </inline>
+								</assembly>
+
+                        </build>
+						<run>
+							<ports>
+								<port>9000:8080</port>
+							</ports>
+							<volumes>
+								<bind>
+									<volume>~/.aws/credentials:/root/.aws/credentials</volume>
+									<volume>${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}:/function/config</volume>
+								</bind>
+							</volumes>
+						</run>
+                    </image>
+                </images>
+            </configuration>
+         </plugin>
+			</plugins>
+		</build>
+      </profile>
+	  <profile>
+        <id>compile</id>
+        <activation>
+        <activeByDefault>false</activeByDefault>
+        </activation>
+		<build>
+			<plugins>
+			<plugin>
+	         <groupId>io.fabric8</groupId>
+	         <artifactId>docker-maven-plugin</artifactId>
+	         <version>0.38.0</version>
+	
+				<executions>
+				  <execution>
+				    <id>docker-build</id>
+				    <goals>
+				       <goal>build</goal>
+				    </goals>
+				  </execution>
+				</executions>
+	
+	            <configuration>
+	                <verbose>true</verbose>
+					<!--<createContainers>true</createContainers>-->
+	
+	                <images>
+	                    <image>
+	                        <name>${project.artifactId}:${project.version}</name>
+	
+	                        <build>
+	                            <!-- This is the same FROM used in a Dockerfile -->
+								<!--
+	                            <from>ghcr.io/graalvm/graalvm-ce:java11-21</from>
+								<workdir>function</workdir>
+								<runCmds>
+									<runCmd>microdnf install -y zip</runCmd>
+									<runCmd>gu install native-image</runCmd>
+									<runCmd>curl -4 -L https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie -o /usr/bin/aws-lambda-rie</runCmd>
+									<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
+								</runCmds>
+								-->
+								<from>ghcr.io/microlam-io/microlam-container:java11-graalvm21</from>
+								<workdir>function</workdir>
+								<runCmds>
+									<runCmd>native-image --verbose -jar ${project.artifactId}-${project.version}.jar -H:Name=func --no-fallback -H:+ReportExceptionStackTraces</runCmd>
+									<runCmd>chmod 755 func</runCmd>
+									<runCmd>chmod 755 bootstrap</runCmd>
+									<runCmd>mkdir native</runCmd>
+									<runCmd>zip -j native/function.zip bootstrap func</runCmd>
+								</runCmds>
+
+	                        	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
+	                            <entryPoint>
+	                                <exec>
+	                                    <arg>/function/bootstrap</arg>
+										<arg>${lambda.handler}</arg>
+	                                </exec>
+	                            </entryPoint>
+	
+									<assembly>
+									  <name>function</name>
+									  <inline>
+										    <dependencySets>
+										        <dependencySet>
+										        	<useProjectArtifact>true</useProjectArtifact>
+										            <includes>
+														<include>${project.groupId}:${project.artifactId}</include>
+													</includes>
+										        </dependencySet>
+										    
+										        <dependencySet>
+										            <outputDirectory>libs</outputDirectory>
+										            <useProjectArtifact>false</useProjectArtifact>
+										        </dependencySet>
+										    </dependencySets>
+	
+										<fileSets>
+										    <fileSet>
+												<directory>${project.basedir}</directory>
+									     		<includes>
+													<include>bootstrap</include>
+												</includes>
+												<outputDirectory>/</outputDirectory>
+										    </fileSet>
+	
+									  	</fileSets>
+									  </inline>
+									</assembly>
+	
+	                        </build>
+							<run>
+								<ports>
+									<port>9000:8080</port>
+								</ports>
+								<volumes>
+									<bind>
+										<volume>~/.aws/credentials:/root/.aws/credentials</volume>
+									</bind>
+								</volumes>
+							</run>
+							 <copy>
+						          <entries>
+						            <entry>
+						              <containerPath>/function/native/function.zip</containerPath>
+						              <hostDirectory>${project.build.directory}/native</hostDirectory>
+						            </entry>
+						          </entries>
+							 </copy>
+	                    </image>
+	                </images>
+	            </configuration>
+	         </plugin>
+			</plugins>
+		</build>
+      </profile>
+
+    </profiles>
+</project>

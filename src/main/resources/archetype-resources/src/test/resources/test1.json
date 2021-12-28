@@ -1,0 +1,6 @@
+{
+  "httpMethod": "POST",
+  "resource": "/mult",
+  "body": "{ \"arguments\": [2, 4, 6, 8] }",
+  "isBase64Encoded": false
+}
