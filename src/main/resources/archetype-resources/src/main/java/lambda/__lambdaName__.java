@@ -2,7 +2,7 @@ package ${package}.lambda;
 
 import io.microlam.aws.lambda.AbstractAPIGatewayProxyMultiMethodResourceLambda;
 
-public class ExampleLambda extends AbstractAPIGatewayProxyMultiMethodResourceLambda {
+public class ${lambdaName} extends AbstractAPIGatewayProxyMultiMethodResourceLambda {
 	
 	@Override
 	protected void registerAllLambda() {
