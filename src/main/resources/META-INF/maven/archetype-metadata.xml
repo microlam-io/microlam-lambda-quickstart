@@ -27,19 +27,15 @@
         <fileSet filtered="true">
             <directory>src/test/resources</directory>
         </fileSet>
-        <fileSet>
+        <fileSet filtered="true">
             <directory/>
             <includes>
               <include>bootstrap</include>
+ 			  <include>README.md</include>
+			  <include>samconfig.toml</include>
+			  <include>template.yaml</include>
             </includes>
         </fileSet>
-        <fileSet>
-            <directory/>
-            <includes>
-              <include>README.md</include>
-            </includes>
-        </fileSet>
-
     </fileSets>
 
 </archetype-descriptor>

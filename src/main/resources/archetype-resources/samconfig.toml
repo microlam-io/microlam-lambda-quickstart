@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "${artifactId}"
+s3_bucket = "${awsBucket}"
+s3_prefix = "${artifactId}"
+region = "${awsRegion}"
+profile = "${awsProfile}"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

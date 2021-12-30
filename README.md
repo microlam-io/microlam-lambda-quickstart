@@ -22,14 +22,39 @@ mvn archetype:generate -Dfilter=io.microlam:
 
 ## Enjoy!
 
+#### Project Description
+
+There are 2 API endpoints defined in our API via API Gateway:
+
+* `POST /mult`
+* `POST /sum`
+
+They are connected to the same lambda via Proxy integration.
+
+Both receive a json body of the form:
+
+```json
+{
+"arguments" : [ 2, 4, 6]
+}
+```
+
+The expected response will be a json of the form:
+
+```json
+{
+"result" : 12
+}
+```
+
+The result will be the sum or the product of the arguments depending on the respective endpoints `/sum` or `/mult`.
+
+The project will generate a Java 11 lambda and also a Custom Runtime Lambda using [GraalVM](https://www.graalvm.org/) compilation of the same java code with [native-image](https://www.graalvm.org/reference-manual/native-image/).
+
+This project implements the Lambda code with the Microlam Simple architecture.
+
 
 #### AWS Lambda Java (Java 11)
-
-##### Create your AWS Lambda via the AWS Console
-
-* Using the `profile`, `region` and `lambdaName` you specified.
-* Using the Java 11 (Corretto) Lambda Runtime
-* Set the handler to `[package].lambda.[lambdaName]`
 
 ##### Build your AWS Lambda Java Deployment Package
 
@@ -39,9 +64,37 @@ mvn package
 
 the Java deployment package is in `target/` folder with the name `[xxx]-aws-lambda.jar`
 
-##### Deploy your AWS Lambda Java Deployment Package
+##### AWS Initial Setup
+
+You have 2 options:
+1. Create the API and the Lambda automatically from the command line using AWS [SAM](https://aws.amazon.com/serverless/sam/)  
+2. Create the API and the Lambda manually via the AWS Console
+
+
+###### Create your AWS Lambda automatically from the command line using AWS SAM
+
+Deploy the App with SAM:
+
+```bash.sh
+sam deploy
+```
+
+###### Info: if something go wrong, or if you want to clean the AWS Account, you can delete everything related to the project in AWS with the command `sam delete`
+
+
+###### Create your AWS Lambda manually via the AWS Console
+
+* Using the `profile`, `region` and `lambdaName` you specified.
+* Using the Java 11 (Corretto) Lambda Runtime
+* Set the handler to `[package].lambda.[lambdaName]`
+* Create the API in API Gateway as described before in the Project Description
+
+
+Then Deploy your AWS Lambda Java Deployment Package:
 
 > Run the Junit Test in class in `[xxx].devops.UploadAndUpdateLambda`
+
+
 
 #### AWS Lambda Native (Custom runtime on Amazon Linux 2)
 
