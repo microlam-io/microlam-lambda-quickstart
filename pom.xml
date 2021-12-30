@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.microlam</groupId>
   <artifactId>microlam-lambda-quickstart</artifactId>
-  <version>0.5</version>
+  <version>0.6-SNAPSHOT</version>
   <packaging>maven-archetype</packaging>
 
   <name>Maven Archetype for microlam-lambda-quickstart</name>
@@ -35,7 +35,7 @@
 	  <connection>scm:git:git://github.com/microlam-io/${project.artifactId}.git</connection>
 	  <developerConnection>scm:git:ssh://git@github.com/microlam-io/${project.artifactId}.git</developerConnection>
 	  <url>https://github.com/microlam-io/${project.artifactId}/tree/master</url>
-    <tag>v0.5</tag>
+    <tag>HEAD</tag>
   </scm>
 
 	<distributionManagement>
