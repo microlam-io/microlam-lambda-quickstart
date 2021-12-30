@@ -361,8 +361,7 @@
 									<runCmd>native-image --verbose -jar ${project.artifactId}-${project.version}.jar -H:Name=func --no-fallback -H:+ReportExceptionStackTraces</runCmd>
 									<runCmd>chmod 755 func</runCmd>
 									<runCmd>chmod 755 bootstrap</runCmd>
-									<runCmd>mkdir native</runCmd>
-									<runCmd>zip -j native/function.zip bootstrap func</runCmd>
+									<runCmd>zip -j ${project.artifactId}-${project.version}-aws-lambda-native.zip bootstrap func</runCmd>
 								</runCmds>
 
 	                        	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
@@ -417,8 +416,8 @@
 							 <copy>
 						          <entries>
 						            <entry>
-						              <containerPath>/function/native/function.zip</containerPath>
-						              <hostDirectory>${project.build.directory}/native</hostDirectory>
+						              <containerPath>/function/${project.artifactId}-${project.version}-aws-lambda-native.zip</containerPath>
+						              <hostDirectory>${project.build.directory}</hostDirectory>
 						            </entry>
 						          </entries>
 							 </copy>

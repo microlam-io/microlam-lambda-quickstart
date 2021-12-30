@@ -100,12 +100,6 @@ Then Deploy your AWS Lambda Java Deployment Package:
 
 ###### Warning: For this, the pre-requisite is that Docker is installed and running on your machine, if not [install it](https://docs.docker.com/get-docker/).
 
-##### Create your AWS Lambda via the AWS Console
-
-* Using the `profile`, `region` and `[lambdaName]Native` you specified.
-* Using the 'Custom runtime on Amazon Linux 2' Lambda Runtime
-* Set the handler to `[package].lambda.[lambdaName]`
-
 ##### Build your AWS Lambda Native Deployment Package
 
 ```bash.sh
@@ -128,7 +122,7 @@ In another console, while the container is running, launch this command:
 mvn docker:copy -Pnative,compile
 ```
 
-This will copy the Native deployment package is `target/native` folder with the name `function.zip`.
+This will copy the Native deployment package is `target` folder with the name `[xxx]-aws-lambda-native.zip`.
 
 You can now stop the running container, with CTRL-C and are ready to upload your deployment package to AWS.
 
@@ -136,7 +130,32 @@ You can now stop the running container, with CTRL-C and are ready to upload your
 
 See why... it certainly means you need to complete the native-image configuration. see below the instructions for running the container for generating the configuration for you.
 
-##### Deploy your AWS Lambda Native Deployment Package
+##### AWS Initial Setup
+
+You have 2 options:
+1. Create the API and the Lambda automatically from the command line using AWS [SAM](https://aws.amazon.com/serverless/sam/)  
+2. Create the API and the Lambda manually via the AWS Console
+
+
+###### Create your AWS Lambda automatically from the command line using AWS SAM
+
+Deploy the App with SAM:
+
+```bash.sh
+sam deploy --template template-native.yaml
+```
+
+###### Info: if something go wrong, or if you want to clean the AWS Account, you can delete everything related to the project in AWS with the command `sam delete`
+
+
+###### Create your AWS Lambda via the AWS Console
+
+* Using the `profile`, `region` and `[lambdaName]Native` you specified.
+* Using the 'Custom runtime on Amazon Linux 2' Lambda Runtime
+* Set the handler to `[package].lambda.[lambdaName]`
+
+
+Then Deploy your AWS Lambda Native Deployment Package
 
 > Run the Junit Test in in class in `xxx.devops.UploadAndUpdateLambdaNative`
 

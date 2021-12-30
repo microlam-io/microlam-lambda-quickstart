@@ -34,6 +34,7 @@
  			  <include>README.md</include>
 			  <include>samconfig.toml</include>
 			  <include>template.yaml</include>
+			  <include>template-native.yaml</include>
             </includes>
         </fileSet>
     </fileSets>
