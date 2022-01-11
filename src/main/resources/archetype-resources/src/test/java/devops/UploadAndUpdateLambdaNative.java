@@ -13,7 +13,7 @@ public class UploadAndUpdateLambdaNative {
 	public void process() {
 		Aws.configure();
 
-	 	File file = new File("${artifactId}-${version}-aws-lambda-native.zip");
+	 	File file = new File("target/${artifactId}-${version}-aws-lambda-native.zip");
 	 	String bucket = Aws.DEPLOYMENT_BUCKET;;
 	 	String s3key = S3Utils.uploadFileToS3(file, bucket, 20); //file.getName();//
 	 	

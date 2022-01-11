@@ -16,7 +16,7 @@ Resources:
   ${lambdaName}:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      FunctionName: ${lambdaName}
+      FunctionName: ${lambdaName}Native
       CodeUri: ./target/${artifactId}-${version}-aws-lambda-native.zip
       Handler: ${package}.lambda.${lambdaName}
       Runtime: provided
@@ -47,9 +47,9 @@ Outputs:
     Description: "API Gateway endpoint URL for Prod stage for ${lambdaName} function"
 #set( $D = '$' )
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${D}{AWS::Region}.amazonaws.com/Prod/"
-  ${lambdaName}:
-    Description: "${lambdaName} Function ARN"
-    Value: !GetAtt ${lambdaName}.Arn
+  ${lambdaName}Native:
+    Description: "${lambdaName}Native Function ARN"
+    Value: !GetAtt ${lambdaName}Native.Arn
   ${lambdaName}IamRole:
-    Description: "Implicit IAM Role created for ${lambdaName} function"
+    Description: "Implicit IAM Role created for ${lambdaName}Native function"
     Value: !GetAtt ${lambdaName}Role.Arn
