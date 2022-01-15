@@ -8,6 +8,7 @@
 	<release.version>11</release.version>
 	<exec.mainClass>com.amazonaws.services.lambda.runtime.api.client.AWSLambda</exec.mainClass>
 	<lambda.handler>${package}.lambda.${lambdaName}</lambda.handler>
+	<compile.run.goal>start</compile.run.goal> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
