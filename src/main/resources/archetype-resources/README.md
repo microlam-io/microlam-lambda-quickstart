@@ -54,21 +54,32 @@ The project will generate a Java 11 lambda and also a Custom Runtime Lambda usin
 This project implements the Lambda code with the Microlam Simple architecture.
 
 
-#### AWS Lambda Java (Java 11)
+#### AWS Lambda Java 11
 
 ##### Build your AWS Lambda Java Deployment Package
 
 ```bash.sh
-mvn package
+mvn package -Pjava
 ```
 
 the Java deployment package is in `target/` folder with the name `[xxx]-aws-lambda.jar`
 
 ##### AWS Initial Setup
 
-You have 2 options:
-1. Create the API and the Lambda automatically from the command line using AWS [SAM](https://aws.amazon.com/serverless/sam/)  
-2. Create the API and the Lambda manually via the AWS Console
+You have 3 options:
+1. Create the API and the Lambda automatically from the command line using AWS [CDK](https://aws.amazon.com/cdk/)
+2. Create the API and the Lambda automatically from the command line using AWS [SAM](https://aws.amazon.com/serverless/sam/)  
+3. Create the API and the Lambda manually via the AWS Console
+
+###### Create your AWS Lambda automatically from the command line using AWS CDK
+
+Deploy the App with the CDK:
+
+```bash.sh
+cdk deploy
+```
+
+###### Info: if something go wrong, or if you want to clean the AWS Account, you can delete everything related to the project in AWS with the command `cdk destroy`
 
 
 ###### Create your AWS Lambda automatically from the command line using AWS SAM
@@ -100,13 +111,34 @@ Then Deploy your AWS Lambda Java Deployment Package:
 
 ###### Warning: For this, the pre-requisite is that Docker is installed and running on your machine, if not [install it](https://docs.docker.com/get-docker/).
 
+* The native build is depending on the java version (`java11` or `java17`) and the target architecture (`amd64` or `arm64`).
+You need to provide this information in maven command line using `-Dnative=javaXX-axx64` (by replacing XX and xx with the correct values)
+
+* You need to activate the profile `compile` with `-Pcompile`
+
+* If you want the build to pause and allow you to run some tests, use also the profile `dev`: `-Pcompile,dev`
+
+
 ##### Build your AWS Lambda Native Deployment Package
 
+In case you choose to build from `Java 11` targeting `amd64` architecture: 
+
 ```bash.sh
-mvn clean install docker:stop docker:build docker:run -P-java,native,compile
+mvn clean install -Dnative=java11-amd64 -Pcompile
 ```
 
-###### In case the build is successful
+or with dev mode activated:
+
+```bash.sh
+mvn clean install -Dnative=java11-amd64 -Pcompile,dev
+```
+
+###### In case the build is successful without dev mode activated
+
+Excellent! The Native deployment package is in `target` folder with the name `[xxx]-aws-lambda-native.zip`.
+
+
+###### In case the build is successful with dev mode activated
 
 Good ! At the end of the build, a container is running, letting you try your native lambda locally.
 
@@ -119,10 +151,10 @@ If it is working as expected, you are ready to deploy it to AWS!
 In another console, while the container is running, launch this command:
 
 ```bash.sh
-mvn docker:copy -Pnative,compile
+mvn docker:copy -Dnative=java11-amd64 -Pcompile
 ```
 
-This will copy the Native deployment package is `target` folder with the name `[xxx]-aws-lambda-native.zip`.
+This will copy the Native deployment package to the `target` folder with the name `[xxx]-aws-lambda-native.zip`.
 
 You can now stop the running container, with CTRL-C and are ready to upload your deployment package to AWS.
 
@@ -132,9 +164,20 @@ See why... it certainly means you need to complete the native-image configuratio
 
 ##### AWS Initial Setup
 
-You have 2 options:
+You have 3 options:
+1. Create the API and the Lambda automatically from the command line using AWS [CDK](https://aws.amazon.com/cdk/)
 1. Create the API and the Lambda automatically from the command line using AWS [SAM](https://aws.amazon.com/serverless/sam/)  
 2. Create the API and the Lambda manually via the AWS Console
+
+###### Create your AWS Lambda automatically from the command line using AWS CDK
+
+You need to apply a few changes to the class `[xxx].devops.cdk.CreateApp` (from `src/test` folder), to set the function Runtime, Architecture and Code.
+
+Deploy the App with the CDK:
+
+```bash.sh
+cdk deploy
+```
 
 
 ###### Create your AWS Lambda automatically from the command line using AWS SAM
@@ -163,7 +206,7 @@ Then Deploy your AWS Lambda Native Deployment Package
 #### AWS Lambda Native Compilation Configuration
 
 ```bash.sh
-mvn clean install docker:stop docker:build docker:run -P-java,native,config
+mvn clean install -Dnative=java11-amd64 -Pconfig
 ```
 
 At the end of the build, a container is running, letting you try your Java lambda locally with the [GraalVM Tracing Agent](https://www.graalvm.org/reference-manual/native-image/Agent/).
@@ -175,4 +218,7 @@ It is a good time to run your tests on it :
 The generated configuration is updated every 30s in folder: `src/main/resources/META-INF/native-image/[groupId]/[artifactId]/`.
 
 If necessary, update the file `native-image.properties`, stop the running container with CTRL-C and retry to compile.
+
+
+
 
