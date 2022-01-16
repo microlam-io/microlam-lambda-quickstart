@@ -6,4 +6,6 @@ target/
 pom.xml.next
 pom.xml.releaseBackup
 pom.xml.tag
+.vscode/
+release.properties
 
