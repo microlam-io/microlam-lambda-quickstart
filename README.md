@@ -1,4 +1,5 @@
 # microlam-lambda-quickstart
+![Maven Central](https://img.shields.io/maven-central/v/io.microlam/microlam-lambda-quickstart)
 
 Maven Archetype for creating minimal Microlam Lambda Quickstart project
 
