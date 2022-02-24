@@ -214,6 +214,73 @@
      </profile>
 
       <profile>
+        <id>java17layer</id>
+        <activation>
+			<property><name>java17layer</name></property>
+       </activation>
+			<build>
+				<plugins>
+					<plugin>
+				        <groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-dependency-plugin</artifactId>
+				        <version>3.2.0</version>
+				        <executions>
+				          <execution>
+				            <id>copy</id>
+				            <phase>package</phase>
+				            <goals>
+				              <goal>copy</goal>
+				            </goals>
+				          </execution>
+				        </executions>
+				        <configuration>
+				          <artifactItems>
+				            <artifactItem>
+				              <groupId>io.microlam</groupId>
+				              <artifactId>lambda-java17-layer</artifactId>
+				              <version>17.0.2.8.1</version>
+							  <classifier>${java17layer.arch}</classifier>
+				              <type>zip</type>
+				            </artifactItem>
+				          </artifactItems>
+				          <outputDirectory>${project.build.directory}</outputDirectory>
+				          <overWriteReleases>false</overWriteReleases>
+				          <overWriteSnapshots>true</overWriteSnapshots>
+				        </configuration>
+			      </plugin>
+	    	</plugins>
+	  	</build>     
+	</profile>
+
+      <profile>
+        <id>java17layer-amd64</id>
+        <activation>
+			<property>
+				<name>java17layer</name>
+				<value>amd64</value>
+			</property>
+       </activation>
+
+		<properties>
+			<java17layer.arch>amd64</java17layer.arch>
+		</properties>
+	  </profile>
+
+      <profile>
+        <id>java17layer-arm64</id>
+        <activation>
+			<property>
+				<name>java17layer</name>
+				<value>arm64</value>
+			</property>
+       </activation>
+
+		<properties>
+			<java17layer.arch>arm64</java17layer.arch>
+		</properties>
+	  </profile>
+
+      <profile>
         <id>native</id>
         <activation>
  			<property><name>native</name></property>

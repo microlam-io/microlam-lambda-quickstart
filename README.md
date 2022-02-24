@@ -107,6 +107,35 @@ Then Deploy your AWS Lambda Java Deployment Package:
 > Run the Junit Test in class in `[xxx].devops.UploadAndUpdateLambda`
 
 
+#### AWS Lambda Java 17
+
+Currently AWS has no official support for Java 17 but a Custom Runtime is provided for both amd64 and arm64 as a [Lambda Layer](https://github.com/microlam-io/lambda-java17-layer).
+
+First modify the pom.xml property:
+
+```pom.xml
+<release.version>17</release.version>
+```
+
+Then ensure your build is using a JDK17+.
+
+##### Building and Bringing the Java 17 Layer
+
+```bash.sh
+mvn package -Pjava -Djava17layer=axx64
+```
+
+where ``axx64`` is ``amd64`` or ``arm64 ``.
+
+This brings the ``java 17 layer`` in your ``target/`` folder.
+
+
+##### Deploying the Java 17 Layer
+
+Using the CDK is the simplest way to deploy the Java 17 Layer (But using the AWS console is also possible).
+
+See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/test` folder).
+
 
 #### AWS Lambda Native (Custom runtime on Amazon Linux 2)
 

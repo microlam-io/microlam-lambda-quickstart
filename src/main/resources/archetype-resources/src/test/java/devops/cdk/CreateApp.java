@@ -1,6 +1,7 @@
 package ${package}.devops.cdk;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.junit.Test;
@@ -18,6 +19,8 @@ import software.amazon.awscdk.services.apigateway.RestApi;
 import software.amazon.awscdk.services.lambda.Architecture;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
+import software.amazon.awscdk.services.lambda.LayerVersion;
+import software.amazon.awscdk.services.lambda.LayerVersionProps;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.constructs.Construct;
 import ${package}.devops.Aws;
@@ -48,20 +51,64 @@ public class CreateApp {
 			
 			@Override
 			protected void init(Construct scope, String id, StackProps props) {
+				
+				//Choose selected values
+				boolean java = true; // false = native compilation | true = java lambda
+				int version = 11; //Java version = 11 or 17 or 8
+				Architecture architecture = Architecture.X86_64; // Architecture.ARM_64 or Architecture.X86_64
+				
+				//Do not modify this
+				String arch = (architecture == Architecture.ARM_64)?"arm64":"amd64";
+				
 				Bucket bucket = new Bucket(this, Aws.DEPLOYMENT_BUCKET);
 				
+				//The Java 17 layer
+				LayerVersion java17layer = null;
+				if (java && (version == 17)) {
+				  java17layer = new LayerVersion(this, "Java17Layer-"+ arch, LayerVersionProps.builder()
+				        .layerVersionName("Java17Layer-" + arch)
+				        .description("Java 17 " + arch)
+				        .compatibleRuntimes(Arrays.asList(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2))
+				        .code(Code.fromAsset("target/lambda-java17-layer-17.0.2.8.1-"+ arch + ".zip"))
+				        .build());
+				}
+				
 			    @SuppressWarnings("serial")
-				Function handler = Function.Builder.create(this, "${lambdaName}")			    		  
+				Function.Builder handlerBuilder = Function.Builder.create(this, "${lambdaName}")			    		  
 		               .functionName("${lambdaName}")
-		               .runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_11) //.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2)
-		               .architecture(Architecture.X86_64) //.architecture(Architecture.ARM_64) 
-		               .code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda.zip")) //.code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda-native.zip"))
+	               	   .architecture(architecture)
 		               .handler("${package}.lambda.${lambdaName}")
 		               .memorySize(512)
 		               .timeout(Duration.seconds(20))
 		               .environment(new HashMap<String, String>() {{
 		                  put("BUCKET", bucket.getBucketName());
-		               }}).build();
+		               }});
+			    
+			    //Code
+			    if (java) {
+			    	handlerBuilder.code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda.zip"));
+			    }
+			    else { //Native
+			    	handlerBuilder.code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda-native.zip"));			    	
+			    }
+
+			    //Runtime
+			    if (java && (version == 8)) {
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_8_CORRETTO);
+			    }
+			    else if (java && (version == 11)) {
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_11); 
+			    }
+			    else { //version = 17
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2);
+			    }
+
+			    //Java 17 layer if necessary
+				if (java && (version == 17)) {
+					handlerBuilder.layers(Collections.singletonList(java17layer));
+				}			    
+			    
+				Function handler =  handlerBuilder.build(); 
 		       
 		        bucket.grantReadWrite(handler);
 		        
