@@ -10,9 +10,10 @@ import java.io.IOException;
 import org.junit.Test;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.google.gson.Gson;
 
 import io.microlam.aws.devops.LambdaUtils;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import ${package}.lambda.body.LambdaBodyOut;
 
 public class LocalLambdaTests {
@@ -21,14 +22,14 @@ public class LocalLambdaTests {
 	public void test1() throws IOException {
 		String result = LambdaUtils.localRunPost(new File("src/test/resources/test1.json"));
 		
-		Gson gson = new Gson();
+		Jsonb jsonb = JsonbBuilder.create();
 		
-		APIGatewayProxyResponseEvent response = gson.fromJson(result, APIGatewayProxyResponseEvent.class);
+		APIGatewayProxyResponseEvent response = jsonb.fromJson(result, APIGatewayProxyResponseEvent.class);
 		assertNotNull(response);
 		assertEquals(200, response.getStatusCode().intValue());
 		assertFalse(response.getIsBase64Encoded());
 		
-		LambdaBodyOut lambdaBodyOut = gson.fromJson(response.getBody(), LambdaBodyOut.class);
+		LambdaBodyOut lambdaBodyOut = jsonb.fromJson(response.getBody(), LambdaBodyOut.class);
 		assertEquals(384, lambdaBodyOut.result);
 	}
 	
@@ -36,14 +37,14 @@ public class LocalLambdaTests {
 	public void test2() throws IOException {
 		String result = LambdaUtils.localRunPost(new File("src/test/resources/test2.json"));
 		
-		Gson gson = new Gson();
+		Jsonb jsonb = JsonbBuilder.create();
 		
-		APIGatewayProxyResponseEvent response = gson.fromJson(result, APIGatewayProxyResponseEvent.class);
+		APIGatewayProxyResponseEvent response = jsonb.fromJson(result, APIGatewayProxyResponseEvent.class);
 		assertNotNull(response);
 		assertEquals(200, response.getStatusCode().intValue());
 		assertFalse(response.getIsBase64Encoded());
 		
-		LambdaBodyOut lambdaBodyOut = gson.fromJson(response.getBody(), LambdaBodyOut.class);
+		LambdaBodyOut lambdaBodyOut = jsonb.fromJson(response.getBody(), LambdaBodyOut.class);
 		assertEquals(20, lambdaBodyOut.result);
 	}
 

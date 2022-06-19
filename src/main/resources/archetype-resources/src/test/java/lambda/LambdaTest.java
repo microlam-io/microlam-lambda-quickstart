@@ -1,7 +1,5 @@
 package ${package}.lambda;
 
-
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -10,9 +8,12 @@ import org.junit.Test;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import com.google.gson.Gson;
 
 import ${package}.lambda.body.LambdaBodyOut;
+
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
+
 
 
 public class LambdaTest {
@@ -31,8 +32,8 @@ public class LambdaTest {
 		assertEquals(200, result.getStatusCode().intValue());
 		assertFalse(result.getIsBase64Encoded());
 		
-		Gson gson = new Gson();
-		LambdaBodyOut lambdaBodyOut = gson.fromJson(result.getBody(), LambdaBodyOut.class);
+		Jsonb jsonb = JsonbBuilder.create();
+		LambdaBodyOut lambdaBodyOut = jsonb.fromJson(result.getBody(), LambdaBodyOut.class);
 		assertEquals(12, lambdaBodyOut.result);
 	}
 
@@ -50,8 +51,8 @@ public class LambdaTest {
 		assertEquals(200, result.getStatusCode().intValue());
 		assertEquals(false, result.getIsBase64Encoded());
 		
-		Gson gson = new Gson();
-		LambdaBodyOut lambdaBodyOut = gson.fromJson(result.getBody(), LambdaBodyOut.class);
+		Jsonb jsonb = JsonbBuilder.create();
+		LambdaBodyOut lambdaBodyOut = jsonb.fromJson(result.getBody(), LambdaBodyOut.class);
 		assertEquals(48, lambdaBodyOut.result);
 	}
 	
