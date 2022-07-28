@@ -344,7 +344,7 @@
 		<properties>
 			<native.version>11</native.version>
 			<native.arch>amd64</native.arch>
-			<sha256>42adec3dec7fd301f9e70b257e6ac0b6520fc7547229539849017e47c723f42a</sha256>
+			<sha256>2adb7eee5c1a4c67aa0d57797de241680118ef11eddd5205665111b49f078fc6</sha256>
 			<config.entryPoint.arguments></config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -361,7 +361,7 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>amd64</native.arch>
-			<sha256>592a569fbe01e09019f6acff231b44caf2dde7b5dc15b01df0399a235c648e16</sha256>
+			<sha256>c192db288e9d9939afb0253b7e2055b2c975c907c81273360b702895a848b27f</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -378,7 +378,7 @@
 		<properties>
 			<native.version>11</native.version>
 			<native.arch>arm64</native.arch>
-			<sha256>416f9c54785920c63e8bf25f13f304bd73ce61d636b07040d1e9ea56c34186a7</sha256>
+			<sha256>175274a7888a15a8709bee2b1f4a84c069ed45c79cc9f7e7dfac648d84c098ae</sha256>
 			<config.entryPoint.arguments></config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -395,7 +395,7 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>arm64</native.arch>
-			<sha256>ed1cebcf195c817ec4a040e8f50b1198d10bf509107c462a36a16fefda48130d</sha256>
+			<sha256>18014964afcb3f55bdd080e52c89e3bd646e6a295f5afdc81bd76b6b1f5cfcb1</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
@@ -448,7 +448,7 @@
 							</runCmds>
 							-->
 							
-							<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v2@sha256:${sha256}</from>
+							<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v22.2.0@sha256:${sha256}</from>
 							<workdir>function</workdir>
                         	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
                             <entryPoint>/usr/bin/aws-lambda-rie java -agentlib:native-image-agent=config-merge-dir=/function/config/,config-write-period-secs=30,config-write-initial-delay-secs=5 ${config.entryPoint.arguments} -jar ${project.artifactId}-${project.version}.jar ${lambda.handler}</entryPoint>
@@ -572,7 +572,7 @@
 									<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
 								</runCmds>
 -->
-								<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v1@sha256:${sha256}</from>
+								<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v22.2.0@sha256:${sha256}</from>
 
 								<workdir>function</workdir>
 								<runCmds>
