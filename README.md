@@ -107,9 +107,9 @@ Then Deploy your AWS Lambda Java Deployment Package:
 > Run the Junit Test in class in `[xxx].devops.UploadAndUpdateLambda`
 
 
-#### AWS Lambda Java 17
+#### AWS Lambda Java 17 or Java 19
 
-Currently AWS has no official support for Java 17 but a Custom Runtime is provided for both amd64 and arm64 as a [Lambda Layer](https://github.com/microlam-io/lambda-java17-layer).
+Currently AWS has no official support for Java 17/19 but a Custom Runtime is provided for both amd64 and arm64 as a [Lambda Layer for Java 17](https://github.com/microlam-io/lambda-java17-layer) or [Lambda Layer for Java 19](https://github.com/microlam-io/lambda-java19-layer).
 
 First modify the pom.xml property:
 
@@ -117,24 +117,39 @@ First modify the pom.xml property:
 <release.version>17</release.version>
 ```
 
-Then ensure your build is using a JDK17+.
+or
 
-##### Building and Bringing the Java 17 Layer
+```pom.xml
+<release.version>19</release.version>
+```
+
+
+Then ensure your build is using a JDK17+ or JDK19+.
+
+##### Building and Bringing the Java 17/19 Layer
 
 ```bash.sh
 mvn package -Pjava -Djava17layer=axx64
 ```
 
+or 
+
+```bash.sh
+mvn package -Pjava -Djava19layer=axx64
+```
+
+
 where ``axx64`` is ``amd64`` or ``arm64 ``.
 
-This brings the ``java 17 layer`` in your ``target/`` folder.
+This brings the ``java 17 layer`` or ``java 19 layer`` in your ``target/`` folder.
 
 
-##### Deploying the Java 17 Layer
+##### Deploying the Java 17/19 Layer
 
-Using the CDK is the simplest way to deploy the Java 17 Layer (But using the AWS console is also possible).
+Using the CDK is the simplest way to deploy the Java 17/19 Layer (But using the AWS console is also possible).
 
 See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/test` folder).
+
 
 
 #### AWS Lambda Native (Custom runtime on Amazon Linux 2)

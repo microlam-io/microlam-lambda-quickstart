@@ -21,7 +21,8 @@
 		  <plugin>
 	        <groupId>org.apache.maven.plugins</groupId>
 	        <artifactId>maven-compiler-plugin</artifactId>
-	        <version>3.8.0</version>
+	        <version>3.10.1</version>
+
 	        <configuration>
 			  <release>${release.version}</release>
 <!--
@@ -33,12 +34,6 @@
 	        </configuration>
 	      </plugin>
 
-		  <plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-help-plugin</artifactId>
-	        <version>3.2.0</version>
-		  </plugin>
-
 		</plugins>
 	</build>
 
@@ -49,7 +44,7 @@
 	<dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-bom</artifactId>
-      <version>0.4.0</version>
+      <version>0.4.4</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -108,6 +103,7 @@
     <dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-aws-devops</artifactId>
+	  <version>0.6</version>
 	  <scope>test</scope>
     </dependency>
 
@@ -228,7 +224,7 @@
 					<plugin>
 				        <groupId>org.apache.maven.plugins</groupId>
 				        <artifactId>maven-dependency-plugin</artifactId>
-				        <version>3.2.0</version>
+				        <version>3.3.0</version>
 				        <executions>
 				          <execution>
 				            <id>copy</id>
@@ -243,7 +239,7 @@
 				            <artifactItem>
 				              <groupId>io.microlam</groupId>
 				              <artifactId>lambda-java17-layer</artifactId>
-				              <version>17.0.2.8.1</version>
+				              <version>17.0.5.8.1_1</version>
 							  <classifier>${java17layer.arch}</classifier>
 				              <type>zip</type>
 				            </artifactItem>
@@ -286,6 +282,73 @@
 	  </profile>
 
       <profile>
+        <id>java19layer</id>
+        <activation>
+			<property><name>java19layer</name></property>
+       </activation>
+			<build>
+				<plugins>
+					<plugin>
+				        <groupId>org.apache.maven.plugins</groupId>
+				        <artifactId>maven-dependency-plugin</artifactId>
+				        <version>3.3.0</version>
+				        <executions>
+				          <execution>
+				            <id>copy</id>
+				            <phase>package</phase>
+				            <goals>
+				              <goal>copy</goal>
+				            </goals>
+				          </execution>
+				        </executions>
+				        <configuration>
+				          <artifactItems>
+				            <artifactItem>
+				              <groupId>io.microlam</groupId>
+				              <artifactId>lambda-java19-layer</artifactId>
+				              <version>19.0.1.10.1</version>
+							  <classifier>${java19layer.arch}</classifier>
+				              <type>zip</type>
+				            </artifactItem>
+				          </artifactItems>
+				          <outputDirectory>${project.build.directory}</outputDirectory>
+				          <overWriteReleases>false</overWriteReleases>
+				          <overWriteSnapshots>true</overWriteSnapshots>
+				        </configuration>
+			      </plugin>
+	    	</plugins>
+	  	</build>     
+	</profile>
+
+      <profile>
+        <id>java19layer-amd64</id>
+        <activation>
+			<property>
+				<name>java19layer</name>
+				<value>amd64</value>
+			</property>
+       </activation>
+
+		<properties>
+			<java19layer.arch>amd64</java19layer.arch>
+		</properties>
+	  </profile>
+
+      <profile>
+        <id>java19layer-arm64</id>
+        <activation>
+			<property>
+				<name>java19layer</name>
+				<value>arm64</value>
+			</property>
+       </activation>
+
+		<properties>
+			<java19layer.arch>arm64</java19layer.arch>
+		</properties>
+	  </profile>
+
+      <profile>
         <id>native</id>
         <activation>
  			<property><name>native</name></property>
@@ -316,7 +379,7 @@
 				<plugin>
 				    <groupId>org.apache.maven.plugins</groupId>
 				    <artifactId>maven-jar-plugin</artifactId>
-				    <version>3.2.0</version>
+				    <version>3.3.0</version>
 				    <configuration>
 				        <archive>
 				            <manifest>
@@ -344,7 +407,28 @@
 		<properties>
 			<native.version>11</native.version>
 			<native.arch>amd64</native.arch>
-			<sha256>2adb7eee5c1a4c67aa0d57797de241680118ef11eddd5205665111b49f078fc6</sha256>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>2b72a2bd4bd4ef853e553ffaf8a11f4589d7087e9831f96accb638950dae850a</sha256>
+			<config.entryPoint.arguments></config.entryPoint.arguments>
+			<native.image.arguments></native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-java11-arm64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>java11-arm64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>11</native.version>
+			<native.arch>arm64</native.arch>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>53d151a20270f073543be4eaf9b78027a39d28b6ec6cc730600707f4febe6c3b</sha256>
 			<config.entryPoint.arguments></config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -361,25 +445,10 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>amd64</native.arch>
-			<sha256>c192db288e9d9939afb0253b7e2055b2c975c907c81273360b702895a848b27f</sha256>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>c53daf2e7f8c440e5e0e5c1471127b532c9297a6bc2bbf943a8d5021b02d3686</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
-			<native.image.arguments></native.image.arguments>
-		</properties>
-	  </profile>
-
-	  <profile>
-        <id>native-java11-arm64</id>
-        <activation>
- 		  <property>
-			<name>native</name>
-			<value>java11-arm64</value>
-		 </property>
-        </activation>
-		<properties>
-			<native.version>11</native.version>
-			<native.arch>arm64</native.arch>
-			<sha256>175274a7888a15a8709bee2b1f4a84c069ed45c79cc9f7e7dfac648d84c098ae</sha256>
-			<config.entryPoint.arguments></config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
 	  </profile>
@@ -395,11 +464,52 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>arm64</native.arch>
-			<sha256>18014964afcb3f55bdd080e52c89e3bd646e6a295f5afdc81bd76b6b1f5cfcb1</sha256>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>05515d2ca5fea3abcc243b56e414651a3b2fd4b0a2f2b4ef477e11a76136ba0d</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
 	  </profile>
+
+	  <profile>
+        <id>native-java19-amd64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>java19-amd64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>19</native.version>
+			<native.arch>amd64</native.arch>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>747b1fc7e0b88330fca151b7071d4819e6789603d04747c8219496c98755fdcf</sha256>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments></native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-java19-arm64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>java19-arm64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>19</native.version>
+			<native.arch>arm64</native.arch>
+			<graalvm.version>22.3.0</graalvm.version>
+			<container.tag>v22.3.0</container.tag>
+			<sha256>f0f8bd13180e3b96193c71ecd15d20372632660fdd169b3e8ce59e7a71d6751f</sha256>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
+		</properties>
+	  </profile>
+
 
 	  <profile>
         <id>config</id>
@@ -413,7 +523,7 @@
 		<plugin>
          <groupId>io.fabric8</groupId>
          <artifactId>docker-maven-plugin</artifactId>
-         <version>0.38.0</version>
+         <version>0.40.2</version>
 
 			<executions>
 			  <execution>
@@ -448,7 +558,14 @@
 							</runCmds>
 							-->
 							
-							<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v22.2.0@sha256:${sha256}</from>
+							<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm${graalvm.version}:${container.tag}</from><!-- @sha256:${sha256} -->
+
+			                <buildx>
+			                  <platforms>
+			                    <platform>linux/${native.arch}</platform>
+			                  </platforms>
+			                </buildx>
+			                
 							<workdir>function</workdir>
                         	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
                             <entryPoint>/usr/bin/aws-lambda-rie java -agentlib:native-image-agent=config-merge-dir=/function/config/,config-write-period-secs=30,config-write-initial-delay-secs=5 ${config.entryPoint.arguments} -jar ${project.artifactId}-${project.version}.jar ${lambda.handler}</entryPoint>
@@ -526,7 +643,7 @@
 			<plugin>
 	         <groupId>io.fabric8</groupId>
 	         <artifactId>docker-maven-plugin</artifactId>
-	         <version>0.38.0</version>
+	         <version>0.40.2</version>
 	
 				<executions>
 				  <execution>
@@ -572,7 +689,13 @@
 									<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
 								</runCmds>
 -->
-								<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm22:v22.2.0@sha256:${sha256}</from>
+								<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm${graalvm.version}:${container.tag}</from> <!-- @sha256:${sha256} -->
+
+				                <buildx>
+				                  <platforms>
+				                    <platform>linux/${native.arch}</platform>
+				                  </platforms>
+				                </buildx>
 
 								<workdir>function</workdir>
 								<runCmds>

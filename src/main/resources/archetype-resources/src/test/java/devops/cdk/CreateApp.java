@@ -54,7 +54,7 @@ public class CreateApp {
 				
 				//Choose selected values
 				boolean java = true; // false = native compilation | true = java lambda
-				int version = 11; //Java version = 11 or 17 or 8
+				int version = 11; //Java version = 11 or 17 or 19 or 8
 				Architecture architecture = Architecture.X86_64; // Architecture.ARM_64 or Architecture.X86_64
 				
 				//Do not modify this
@@ -62,14 +62,14 @@ public class CreateApp {
 				
 				Bucket bucket = new Bucket(this, Aws.DEPLOYMENT_BUCKET);
 				
-				//The Java 17 layer
-				LayerVersion java17layer = null;
-				if (java && (version == 17)) {
-				  java17layer = new LayerVersion(this, "Java17Layer-"+ arch, LayerVersionProps.builder()
-				        .layerVersionName("Java17Layer-" + arch)
-				        .description("Java 17 " + arch)
+				//The Java 17/19 layer
+				LayerVersion javalayer = null;
+				if (java && ((version == 17) || (version == 19))) {
+				  javalayer = new LayerVersion(this, "Java" + version + "Layer-"+ arch, LayerVersionProps.builder()
+				        .layerVersionName("Java" +  version +"Layer-" + arch)
+				        .description("Java "+ version + " " + arch)
 				        .compatibleRuntimes(Arrays.asList(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2))
-				        .code(Code.fromAsset("target/lambda-java17-layer-17.0.2.8.1-"+ arch + ".zip"))
+				        .code(Code.fromAsset("target/lambda-java"+ version + "-layer-" + ((version == 17)?"17.0.5.8.1_1":"19.0.1.10.1") + "-"+ arch + ".zip"))
 				        .build());
 				}
 				
@@ -99,13 +99,13 @@ public class CreateApp {
 			    else if (java && (version == 11)) {
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_11); 
 			    }
-			    else { //version = 17
+			    else { //version = 17 or 19
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2);
 			    }
 
-			    //Java 17 layer if necessary
-				if (java && (version == 17)) {
-					handlerBuilder.layers(Collections.singletonList(java17layer));
+			    //Java 17/19 layer if necessary
+				if (java && ((version == 17) || (version == 19))) {
+					handlerBuilder.layers(Collections.singletonList(javalayer));
 				}			    
 			    
 				Function handler =  handlerBuilder.build(); 
