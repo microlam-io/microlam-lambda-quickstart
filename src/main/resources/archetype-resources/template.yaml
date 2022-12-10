@@ -9,6 +9,8 @@ Description: >
 Globals:
   Function:
     Timeout: 20
+    SnapStart:
+       ApplyOn: PublishedVersions
   Api:
     EndpointConfiguration: REGIONAL
 

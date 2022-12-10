@@ -5,8 +5,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
 import io.microlam.aws.lambda.APIGatewayProxyLambda;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import ${package}.bs.BusinessProcessorMult;
 import ${package}.lambda.body.LambdaBodyIn;
 import ${package}.lambda.body.LambdaBodyOut;

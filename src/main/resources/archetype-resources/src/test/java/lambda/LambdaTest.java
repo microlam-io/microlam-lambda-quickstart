@@ -11,8 +11,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 
 import ${package}.lambda.body.LambdaBodyOut;
 
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 
 

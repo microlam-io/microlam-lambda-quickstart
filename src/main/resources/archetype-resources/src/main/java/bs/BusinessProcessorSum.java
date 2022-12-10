@@ -1,10 +1,8 @@
 package ${package}.bs;
 
-import io.microlam.aws.lambda.pipeline.BusinessProcessor;
-import io.netty.channel.ChannelHandler.Sharable;
+import io.microlam.aws.lambda.BusinessOperator;
 
-@Sharable
-public class BusinessProcessorSum extends BusinessProcessor<int[], Integer> {
+public class BusinessProcessorSum implements BusinessOperator<int[], Integer> {
 
 	@Override
 	public Integer process(int[] msg) {

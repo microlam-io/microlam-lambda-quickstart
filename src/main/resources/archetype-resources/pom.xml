@@ -8,11 +8,11 @@
 	<release.version>11</release.version>
 	<exec.mainClass>com.amazonaws.services.lambda.runtime.api.client.AWSLambda</exec.mainClass>
 	<lambda.handler>${package}.lambda.${lambdaName}</lambda.handler>
-	<compile.run.goal>start</compile.run.goal> 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit.version>4.12</junit.version>
+    <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
   </properties>
 
 	<build>
@@ -34,6 +34,21 @@
 	        </configuration>
 	      </plugin>
 
+		<plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-jar-plugin</artifactId>
+		    <version>3.3.0</version>
+		    <configuration>
+		        <archive>
+		            <manifest>
+		                <addClasspath>true</addClasspath>
+		                <classpathPrefix>libs/</classpathPrefix>
+		                <mainClass>${exec.mainClass}</mainClass>
+		            </manifest>
+		        </archive>
+		    </configuration>
+		</plugin>
+
 		</plugins>
 	</build>
 
@@ -44,7 +59,7 @@
 	<dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-bom</artifactId>
-      <version>0.4.4</version>
+      <version>0.5.1-SNAPSHOT</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -60,20 +75,20 @@
 	</dependency>
   
     <dependency>
-        <groupId>jakarta.json.bind</groupId>
-        <artifactId>jakarta.json.bind-api</artifactId>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-json_1.1_spec</artifactId>
     </dependency>
-    
-    <dependency>
-		<groupId>org.eclipse</groupId>
-		<artifactId>yasson</artifactId>
-    </dependency>
-  
-	<dependency>
-	    <groupId>io.netty</groupId>
-	    <artifactId>netty-codec</artifactId>
+
+   	<dependency>
+	    <groupId>org.apache.johnzon</groupId>
+	    <artifactId>johnzon-jsonb</artifactId>
 	</dependency>
 
+	<dependency>
+        <groupId>org.apache.geronimo.specs</groupId>
+        <artifactId>geronimo-jsonb_1.0_spec</artifactId>
+    </dependency>
+  
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -84,11 +99,18 @@
     	<artifactId>slf4j-simple-lambda</artifactId>
 	</dependency>
       
+<!--      
  	<dependency>
  		<groupId>org.slf4j</groupId>
  		<artifactId>log4j-over-slf4j</artifactId>
  	</dependency>
-    
+ 	
+ 	<dependency>
+	    <groupId>org.apache.logging.log4j</groupId>
+	    <artifactId>log4j-api</artifactId>
+	</dependency>
+
+-->    
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-lambda-java-core</artifactId>
@@ -103,7 +125,7 @@
     <dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-aws-devops</artifactId>
-	  <version>0.6</version>
+	  <version>0.7-SNAPSHOT</version>
 	  <scope>test</scope>
     </dependency>
 
@@ -139,6 +161,12 @@
 
 	<dependency>
         <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>apigateway</artifactId>
+        <scope>test</scope>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
     	<artifactId>sts</artifactId>
         <scope>test</scope>
 	</dependency>
@@ -166,20 +194,9 @@
     <profiles>
 
       <profile>
-        <id>dev</id>
-        <activation>
-			<activeByDefault>false</activeByDefault>
-        </activation>
-
-		<properties>	
-			<compile.run.goal>run</compile.run.goal> <!-- Pause and require CTRL-C for stopping --> 
-		</properties>
-      </profile>
-
-      <profile>
         <id>java</id>
         <activation>
-			<activeByDefault>false</activeByDefault>
+			<activeByDefault>true</activeByDefault>
         </activation>
 
 		<build>
@@ -348,53 +365,6 @@
 		</properties>
 	  </profile>
 
-      <profile>
-        <id>native</id>
-        <activation>
- 			<property><name>native</name></property>
-        </activation>
-		
-		<dependencies>
-
-		    <dependency>
-		      <groupId>com.amazonaws</groupId>
-		      <artifactId>aws-lambda-java-core</artifactId>
-		    </dependency>
-
-			<dependency>
-			   <groupId>io.microlam</groupId>
-			   <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
-			</dependency>
-
-			<dependency>
-			    <groupId>io.microlam</groupId>
-				<artifactId>aws-lambda-java-runtime-interface-client-native-config</artifactId>
-				<classifier>java${native.version}</classifier>
-			</dependency>
-
-		</dependencies>
-
-		<build>
-			<plugins>
-				<plugin>
-				    <groupId>org.apache.maven.plugins</groupId>
-				    <artifactId>maven-jar-plugin</artifactId>
-				    <version>3.3.0</version>
-				    <configuration>
-				        <archive>
-				            <manifest>
-				                <addClasspath>true</addClasspath>
-				                <classpathPrefix>libs/</classpathPrefix>
-				                <mainClass>${exec.mainClass}</mainClass>
-				            </manifest>
-				        </archive>
-				    </configuration>
-				</plugin>
-			</plugins>
-		</build>
-      </profile>
-
-
 	  <profile>
         <id>native-java11-amd64</id>
         <activation>
@@ -409,9 +379,8 @@
 			<native.arch>amd64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>2b72a2bd4bd4ef853e553ffaf8a11f4589d7087e9831f96accb638950dae850a</sha256>
-			<config.entryPoint.arguments></config.entryPoint.arguments>
-			<native.image.arguments></native.image.arguments>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments>--add-opens java.base/java.util=ALL-UNNAMED</native.image.arguments>
 		</properties>
 	  </profile>
 
@@ -428,8 +397,7 @@
 			<native.arch>arm64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>53d151a20270f073543be4eaf9b78027a39d28b6ec6cc730600707f4febe6c3b</sha256>
-			<config.entryPoint.arguments></config.entryPoint.arguments>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
 	  </profile>
@@ -447,7 +415,6 @@
 			<native.arch>amd64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>c53daf2e7f8c440e5e0e5c1471127b532c9297a6bc2bbf943a8d5021b02d3686</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -466,7 +433,6 @@
 			<native.arch>arm64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>05515d2ca5fea3abcc243b56e414651a3b2fd4b0a2f2b4ef477e11a76136ba0d</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
@@ -485,7 +451,6 @@
 			<native.arch>amd64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>747b1fc7e0b88330fca151b7071d4819e6789603d04747c8219496c98755fdcf</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -504,12 +469,39 @@
 			<native.arch>arm64</native.arch>
 			<graalvm.version>22.3.0</graalvm.version>
 			<container.tag>v22.3.0</container.tag>
-			<sha256>f0f8bd13180e3b96193c71ecd15d20372632660fdd169b3e8ce59e7a71d6751f</sha256>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
 	  </profile>
 
+      <profile>
+        <id>native</id>
+        <activation>
+ 			<property><name>native</name></property>
+        </activation>
+		
+		<dependencies>
+
+		    <dependency>
+		      <groupId>com.amazonaws</groupId>
+		      <artifactId>aws-lambda-java-core</artifactId>
+		    </dependency>
+
+			<dependency>
+			    <groupId>com.amazonaws</groupId>
+			    <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
+			    <version>2.1.1</version>
+			</dependency>
+
+			<dependency>
+			    <groupId>io.microlam</groupId>
+				<artifactId>aws-lambda-java-runtime-interface-client-native-config</artifactId>
+				<classifier>java${native.version}</classifier>
+				<version>2.1.1_1</version>
+			</dependency>
+
+		</dependencies>
+      </profile>
 
 	  <profile>
         <id>config</id>
@@ -517,94 +509,112 @@
         	<activeByDefault>false</activeByDefault>
         </activation>
 
-		
 		<build>
-		<plugins>
-		<plugin>
-         <groupId>io.fabric8</groupId>
-         <artifactId>docker-maven-plugin</artifactId>
-         <version>0.40.2</version>
+			<plugins>
+	
+				<plugin>
+			        <artifactId>maven-assembly-plugin</artifactId>
+			        <version>3.3.0</version>
+			        <configuration>
+			          <descriptors>
+			            <descriptor>src/assembly/native-config.xml</descriptor>
+			          </descriptors>
+			        </configuration>
+			        <executions>
+			          <execution>
+			            <id>create-docker-native-config-java${native.version}-${native.arch}</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>single</goal>
+			            </goals>
+			            <configuration>
+			            	<attach>false</attach>
+			            </configuration>
+			          </execution>
+			        </executions>
+			      </plugin>
+			      
+			    <plugin>
+			        <groupId>com.soebes.maven.plugins</groupId>
+			        <artifactId>echo-maven-plugin</artifactId>
+			        <version>0.5.0</version>
+			        <executions>
+			          <execution>
+			            <id>config-help</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>echo</goal>
+			            </goals>
+			            <configuration>
+			              <echos>
+			                <echo>Now you are ready to configure your native compilation with:</echo>
+			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch} -t ${project.artifactId}-config:latest</echo>
+			                <echo>STEP 2: docker run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</echo>
+			                <echo>STEP 3: Execute your tests against your implementation, using LocalLambdaTests or curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'</echo>
+			                <echo>STEP 4: Find the generated configuration files in ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config</echo>
+			              </echos>
+			            </configuration>
+			          </execution>
+			        </executions>
+			    </plugin>
+			    
+		          <plugin>
+		            <groupId>org.apache.maven.plugins</groupId>
+			        <artifactId>maven-toolchains-plugin</artifactId>
+			        <version>3.1.0</version>
+			        <executions>
+			          <execution>
+			            <goals>
+			              <goal>toolchain</goal>
+			            </goals>
+			          </execution>
+			        </executions>
+			        <configuration>
+			          <toolchains>
+			            <paths>
+			              <!-- Select the "binaries" Paths Toolchain Configuration -->
+			              <id>binaries</id>
+			            </paths>
+			          </toolchains>
+			        </configuration>
+			      </plugin>
+      
+			    <plugin>
+			        <groupId>org.codehaus.mojo</groupId>
+			        <artifactId>exec-maven-plugin</artifactId>
+			        <version>3.1.0</version>
+			        <extensions>true</extensions>
+			        <executions>
+			          <execution>
+			            <id>config-docker-build</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch} -t ${project.artifactId}-config:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			          <execution>
+			            <id>config-docker-run</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			        </executions> 
 
-			<executions>
-			  <execution>
-			    <id>native-config-java${native.version}-${native.arch}</id>
-				<phase>package</phase>
-			    <goals>
-				   <goal>stop</goal>
-			       <goal>build</goal>
-				   <goal>run</goal>
-			    </goals>
-			  </execution>
-			</executions>
-
-            <configuration>
-                <verbose>true</verbose>
-				<createContainers>true</createContainers>
-
-                <images>
-                    <image>
-                        <name>${project.artifactId}:${project.version}-native-config-java${native.version}-${native.arch}</name>
-
-                        <build>
-
-                            <!-- This is the same FROM used in a Dockerfile -->
-							<!--
-                            <from>ghcr.io/graalvm/graalvm-ce:java11-21</from>
-							<workdir>function</workdir>
-							<runCmds>
-								<runCmd>gu install native-image</runCmd>
-								<runCmd>curl -4 -L https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie -o /usr/bin/aws-lambda-rie</runCmd>
-								<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
-							</runCmds>
-							-->
-							
-							<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm${graalvm.version}:${container.tag}</from><!-- @sha256:${sha256} -->
-
-			                <buildx>
-			                  <platforms>
-			                    <platform>linux/${native.arch}</platform>
-			                  </platforms>
-			                </buildx>
-			                
-							<workdir>function</workdir>
-                        	<!-- This is the same ENTRYPOINT used in a Dockerfile -->
-                            <entryPoint>/usr/bin/aws-lambda-rie java -agentlib:native-image-agent=config-merge-dir=/function/config/,config-write-period-secs=30,config-write-initial-delay-secs=5 ${config.entryPoint.arguments} -jar ${project.artifactId}-${project.version}.jar ${lambda.handler}</entryPoint>
-
-								<assembly>
-								  <name>function</name>
-								  <inline>
-									    <dependencySets>
-									        <dependencySet>
-									        	<useProjectArtifact>true</useProjectArtifact>
-									            <includes>
-													<include>${project.groupId}:${project.artifactId}</include>
-												</includes>
-									        </dependencySet>
-									    
-									        <dependencySet>
-									            <outputDirectory>libs</outputDirectory>
-									            <useProjectArtifact>false</useProjectArtifact>
-									        </dependencySet>
-									    </dependencySets>
-								  </inline>
-								</assembly>
-
-                        </build>
-						<run>
-							<ports>
-								<port>9000:8080</port>
-							</ports>
-							<volumes>
-								<bind>
-									<volume>~/.aws/credentials:/root/.aws/credentials</volume>
-									<volume>${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}:/function/config</volume>
-								</bind>
-							</volumes>
-						</run>
-                    </image>
-                </images>
-            </configuration>
-         </plugin>
+					<configuration>
+          				<toolchain>paths</toolchain>
+          				<executable>docker</executable>
+          				<useMavenLogger>false</useMavenLogger>
+         			</configuration>
+        		
+			    </plugin>
+			    
 			</plugins>
 		</build>
       </profile>
@@ -616,7 +626,120 @@
         </activation>
 		<build>
 			<plugins>
+			
 				<plugin>
+			        <artifactId>maven-assembly-plugin</artifactId>
+			        <version>3.3.0</version>
+			        <configuration>
+			          <descriptors>
+			            <descriptor>src/assembly/native-compile.xml</descriptor>
+			          </descriptors>
+			        </configuration>
+			        <executions>
+			          <execution>
+			            <id>create-docker-native-compile-java${native.version}-${native.arch}</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>single</goal>
+			            </goals>
+			            <configuration>
+			            	<attach>false</attach>
+			            </configuration>
+			          </execution>
+			        </executions>
+			      </plugin>
+
+
+			    <plugin>
+			        <groupId>com.soebes.maven.plugins</groupId>
+			        <artifactId>echo-maven-plugin</artifactId>
+			        <version>0.5.0</version>
+			        <executions>
+			          <execution>
+			            <id>compile-help</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>echo</goal>
+			            </goals>
+			            <configuration>
+			              <echos>
+			                <echo>Now you are ready to configure your native compilation with:</echo>
+			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch} -t ${project.artifactId}:latest</echo>
+			                <echo>STEP 2: docker run --attach STDOUT -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}:/function --name ${project.artifactId}-${project.version}-native-compile-${maven.build.timestamp} ${project.artifactId}:latest</echo>
+			              </echos>
+			            </configuration>
+			          </execution>
+			        </executions>
+			    </plugin>
+			    
+	          <plugin>
+		        <artifactId>maven-toolchains-plugin</artifactId>
+		        <version>1.1</version>
+		        <executions>
+		          <execution>
+		            <goals>
+		              <goal>toolchain</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+		        <configuration>
+		          <toolchains>
+		            <paths>
+		              <!-- Select the "binaries" Paths Toolchain Configuration -->
+		              <id>binaries</id>
+		            </paths>
+		          </toolchains>
+		        </configuration>
+		      </plugin>
+      
+			    <plugin>
+			        <groupId>org.codehaus.mojo</groupId>
+			        <artifactId>exec-maven-plugin</artifactId>
+			        <version>3.1.0</version>
+			        <extensions>true</extensions>
+			        <executions>
+			          <execution>
+			            <id>compile-docker-build</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch} -t ${project.artifactId}:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			          <execution>
+			            <id>compile-docker-run</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}/function/out:/function/out ${project.artifactId}:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			          <execution>
+			            <id>copy-artifact-to-target</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+			            	<executable>cp</executable>
+							<commandlineArgs>${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}/function/out/${project.artifactId}-${project.version}-aws-lambda-native.zip ${project.build.directory}</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			        </executions> 
+			        
+					<configuration>
+          				<toolchain>paths</toolchain>
+          				<executable>docker</executable>
+          				<useMavenLogger>false</useMavenLogger>
+        			</configuration>
+        		
+			    </plugin>
+			    
+			   <plugin>
 		        <groupId>org.codehaus.mojo</groupId>
 		        <artifactId>build-helper-maven-plugin</artifactId>
 		        <version>3.3.0</version>
@@ -640,129 +763,144 @@
 		        </executions>
 		      </plugin>
 
-			<plugin>
-	         <groupId>io.fabric8</groupId>
-	         <artifactId>docker-maven-plugin</artifactId>
-	         <version>0.40.2</version>
-	
-				<executions>
-				  <execution>
-				    <id>native-compile-java${native.version}-${native.arch}</id>
-					<phase>package</phase>
-				    <goals>
-					   <goal>stop</goal>
-				       <goal>build</goal>
-					   <goal>${compile.run.goal}</goal>
-				    </goals>
-				  </execution>
-				  <execution>
-				    <id>native-compile-copy-java${native.version}-${native.arch}</id>
-					<phase>verify</phase>
-				    <goals>
-					   <goal>copy</goal>
-				    </goals>
-				  </execution>
-				  <execution>
-				    <id>native-compile-stop-java${native.version}-${native.arch}</id>
-					<phase>install</phase>
-				    <goals>
-					   <goal>stop</goal>
-				    </goals>
-				  </execution>
-				</executions>
-	
-	            <configuration>
-	                <verbose>true</verbose>
-	
-	                <images>
-	                    <image>
-	                        <name>${project.artifactId}:${project.version}-native-compile-java${native.version}-${native.arch}</name>
-	
-	                        <build>
-<!--
-	                            <from>ghcr.io/graalvm/graalvm-ce:java11-21</from>
-								<workdir>function</workdir>
-								<runCmds>
-									<runCmd>microdnf install -y zip</runCmd>
-									<runCmd>gu install native-image</runCmd>
-									<runCmd>curl -4 -L https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie -o /usr/bin/aws-lambda-rie</runCmd>
-									<runCmd>chmod 755 /usr/bin/aws-lambda-rie</runCmd>
-								</runCmds>
--->
-								<from>ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm${graalvm.version}:${container.tag}</from> <!-- @sha256:${sha256} -->
+			</plugins>
+		</build>
 
-				                <buildx>
-				                  <platforms>
-				                    <platform>linux/${native.arch}</platform>
-				                  </platforms>
-				                </buildx>
+      </profile>
 
-								<workdir>function</workdir>
-								<runCmds>
-									<runCmd>native-image --verbose ${native.image.arguments}  -jar ${project.artifactId}-${project.version}.jar -H:Name=func --no-fallback -H:+ReportExceptionStackTraces</runCmd>
-									<runCmd>chmod 755 func</runCmd>
-									<runCmd>chmod 755 bootstrap</runCmd>
-									<runCmd>zip -j ${project.artifactId}-${project.version}-aws-lambda-native.zip bootstrap func</runCmd>
-								</runCmds>
+	  <profile>
+        <id>run</id>
+        <activation>
+        	<activeByDefault>false</activeByDefault>
+        </activation>
 
-	                            <entryPoint>/function/bootstrap ${lambda.handler}</entryPoint>
+		<build>
+			<plugins>
+		      
+			      <plugin>
+			        <artifactId>maven-resources-plugin</artifactId>
+			        <version>3.3.0</version>
+			        <executions>
+			          <execution>
+			            <id>copy-resources</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>copy-resources</goal>
+			            </goals>
+			            <configuration>
+			              <outputDirectory>${project.build.directory}/${project.artifactId}-${project.version}-native-run/java${native.version}-${native.arch}</outputDirectory>
+			              <resources>          
+			                <resource>
+			                  <directory>src/docker/native-run</directory>
+			                  <filtering>true</filtering>
+			                </resource>
+			              </resources>              
+			            </configuration>            
+			          </execution>
+			        </executions>
+			      </plugin>
+      
+			     <plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>3.1.0</version>
+					<executions>
+					    <execution>
+					        <id>Unzip aws-lambda-native zip</id>
+					        <phase>package</phase>
+					        <configuration>
+					            <target>
+					                <unzip src="${project.build.directory}/${project.artifactId}-${project.version}-aws-lambda-native.zip" dest="${project.build.directory}/${project.artifactId}-${project.version}-native-run/java${native.version}-${native.arch}/function"/>
+					            </target>
+					        </configuration>
+					        <goals>
+					            <goal>run</goal>
+					        </goals>
+					    </execution>
+					</executions>
+				</plugin>
+				
+			    <plugin>
+			        <groupId>com.soebes.maven.plugins</groupId>
+			        <artifactId>echo-maven-plugin</artifactId>
+			        <version>0.5.0</version>
+			        <executions>
+			          <execution>
+			            <id>run-help</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>echo</goal>
+			            </goals>
+			            <configuration>
+			              <echos>
+			                <echo>Now you are ready to run your native compilation with:</echo>
+			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-run/java${native.version}-${native.arch} -t ${project.artifactId}-run:latest</echo>
+			                <echo>STEP 2: docker run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</echo>
+			                <echo>STEP 3: Execute your tests against your implementation, using LocalLambdaTests or curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'</echo>
+			                <echo>STEP 4: Find the generated configuration files in ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config</echo>
+			              </echos>
+			            </configuration>
+			          </execution>
+			        </executions>
+			    </plugin>
 
-									<assembly>
-									  <name>function</name>
-									  <inline>
-										    <dependencySets>
-										        <dependencySet>
-										        	<useProjectArtifact>true</useProjectArtifact>
-										            <includes>
-														<include>${project.groupId}:${project.artifactId}</include>
-													</includes>
-										        </dependencySet>
-										    
-										        <dependencySet>
-										            <outputDirectory>libs</outputDirectory>
-										            <useProjectArtifact>false</useProjectArtifact>
-										        </dependencySet>
-										    </dependencySets>
-	
-										<fileSets>
-										    <fileSet>
-												<directory>${project.basedir}</directory>
-									     		<includes>
-													<include>bootstrap</include>
-												</includes>
-												<outputDirectory>/</outputDirectory>
-										    </fileSet>
-	
-									  	</fileSets>
-									  </inline>
-									</assembly>
-	
-	                        </build>
-							<run>
-								<ports>
-									<port>9000:8080</port>
-								</ports>
-								<volumes>
-									<bind>
-										<volume>~/.aws/credentials:/root/.aws/credentials</volume>
-									</bind>
-								</volumes>
-							</run>
-							 <copy>
-						          <entries>
-						            <entry>
-						              <containerPath>/function/${project.artifactId}-${project.version}-aws-lambda-native.zip</containerPath>
-						              <hostDirectory>${project.build.directory}</hostDirectory>
-						            </entry>
-						          </entries>
-							 </copy>
-	                    </image>
-	                </images>
-	            </configuration>
-	         </plugin>
+		          <plugin>
+			        <artifactId>maven-toolchains-plugin</artifactId>
+			        <version>1.1</version>
+			        <executions>
+			          <execution>
+			            <goals>
+			              <goal>toolchain</goal>
+			            </goals>
+			          </execution>
+			        </executions>
+			        <configuration>
+			          <toolchains>
+			            <paths>
+			              <!-- Select the "binaries" Paths Toolchain Configuration -->
+			              <id>binaries</id>
+			            </paths>
+			          </toolchains>
+			        </configuration>
+			      </plugin>
+      
+			    <plugin>
+			        <groupId>org.codehaus.mojo</groupId>
+			        <artifactId>exec-maven-plugin</artifactId>
+			        <version>3.1.0</version>
+			        <extensions>true</extensions>
+			        <executions>
+			          <execution>
+			            <id>run-docker-build</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-run/java${native.version}-${native.arch} -t ${project.artifactId}-run:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			          <execution>
+			            <id>run-docker-run</id>
+			            <phase>package</phase>
+			            <goals>
+			              <goal>exec</goal>
+			            </goals>
+			            <configuration>
+							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</commandlineArgs>	
+			            </configuration>
+			          </execution>
+			        </executions> 
+					<configuration>
+          				<toolchain>paths</toolchain>
+          				<executable>docker</executable>
+          				<useMavenLogger>false</useMavenLogger>
+         			</configuration>
+        		
+			    </plugin>
+			    
 			</plugins>
 		</build>
       </profile>
-
     </profiles>
 </project>

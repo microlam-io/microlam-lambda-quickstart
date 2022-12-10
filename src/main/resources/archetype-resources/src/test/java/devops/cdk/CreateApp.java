@@ -16,11 +16,14 @@ import software.amazon.awscdk.services.apigateway.EndpointConfiguration;
 import software.amazon.awscdk.services.apigateway.EndpointType;
 import software.amazon.awscdk.services.apigateway.LambdaIntegration;
 import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.lambda.Alias;
 import software.amazon.awscdk.services.lambda.Architecture;
+import software.amazon.awscdk.services.lambda.CfnFunction;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.LayerVersion;
 import software.amazon.awscdk.services.lambda.LayerVersionProps;
+import software.amazon.awscdk.services.lambda.CfnFunction.SnapStartProperty;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.constructs.Construct;
 import ${package}.devops.Aws;
@@ -108,7 +111,13 @@ public class CreateApp {
 					handlerBuilder.layers(Collections.singletonList(javalayer));
 				}			    
 			    
-				Function handler =  handlerBuilder.build(); 
+				Function handler =  handlerBuilder.build();
+				Alias alias = handler.addAlias("live");
+				
+		        if (java && (version == 11) && (architecture == Architecture.X86_64)) {
+			        // Currently the CDK has not delivered L2 support for SnapStart, need to use L1 support (see https://github.com/aws/aws-cdk/issues/23153)
+			        ((CfnFunction) handler.getNode().getDefaultChild()).setSnapStart(SnapStartProperty.builder().applyOn("PublishedVersions").build());
+		        }
 		       
 		        bucket.grantReadWrite(handler);
 		        
@@ -117,11 +126,11 @@ public class CreateApp {
 		                .endpointConfiguration(EndpointConfiguration.builder().types(Arrays.asList(EndpointType.REGIONAL)).build())
 		                .build();
 		        
-		        LambdaIntegration lambdaIntegration1 = LambdaIntegration.Builder.create(handler)
+		        LambdaIntegration lambdaIntegration1 = LambdaIntegration.Builder.create(alias)
 		        		.proxy(true)
 		        		.allowTestInvoke(true)
 		        		.build();
-		        LambdaIntegration lambdaIntegration2 = LambdaIntegration.Builder.create(handler)
+		        LambdaIntegration lambdaIntegration2 = LambdaIntegration.Builder.create(alias)
 		        		.proxy(true)
 		        		.allowTestInvoke(true)
 		        		.build();

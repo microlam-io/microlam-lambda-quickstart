@@ -6,7 +6,7 @@ Maven Archetype for creating minimal Microlam Lambda Quickstart project
 To use it:
 
 ```bash.sh
-mvn archetype:generate -Dfilter=io.microlam:
+mvn archetype:generate -Dfilter=io.microlam:microlam-lambda-quickstart
 ```
 
 ###### Warning: Don't forget the ':' at the end of the command!
@@ -60,10 +60,12 @@ This project implements the Lambda code with the Microlam Simple architecture.
 ##### Build your AWS Lambda Java Deployment Package
 
 ```bash.sh
-mvn package -Pjava
+mvn package
 ```
 
 the Java deployment package is in `target/` folder with the name `[xxx]-aws-lambda.jar`
+
+###### Note: -Pjava not needed anymore as the profile java is activated by default. If you want to disable it you may provide -P-java to disable it. 
 
 ##### AWS Initial Setup
 
@@ -129,13 +131,13 @@ Then ensure your build is using a JDK17+ or JDK19+.
 ##### Building and Bringing the Java 17/19 Layer
 
 ```bash.sh
-mvn package -Pjava -Djava17layer=axx64
+mvn package -Djava17layer=axx64
 ```
 
 or 
 
 ```bash.sh
-mvn package -Pjava -Djava19layer=axx64
+mvn package -Djava19layer=axx64
 ```
 
 
@@ -156,36 +158,57 @@ See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/te
 
 ###### Warning: For this, the pre-requisite is that Docker is installed and running on your machine, if not [install it](https://docs.docker.com/get-docker/).
 
+* You need to configure your paths (so docker command can be found) in the `toolchains.xml` file in `~/.m2/toolchains.xml` like this:
+
+```toolchains.xml
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+	<toolchain>
+        <type>paths</type>
+        <provides>
+            <id>binaries</id>
+        </provides>
+        <configuration>
+            <!-- Defines the folders to search for binaries of the "paths" toolset -->
+            <paths>
+                <path>/usr/local/bin</path>
+            </paths>
+        </configuration>
+    </toolchain>
+</toolchains>
+```
+
 * The native build is depending on the java version (`java11` or `java17`) and the target architecture (`amd64` or `arm64`).
 You need to provide this information in maven command line using `-Dnative=javaXX-axx64` (by replacing XX and xx with the correct values)
 
 * You need to activate the profile `compile` with `-Pcompile`
 
-* If you want the build to pause and allow you to run some tests, use also the profile `dev`: `-Pcompile,dev`
 
-
-##### Build your AWS Lambda Native Deployment Package
+##### Compile and Build your AWS Lambda Native Deployment Package
 
 In case you choose to build from `Java 11` targeting `amd64` architecture: 
 
 ```bash.sh
-mvn clean install -Dnative=java11-amd64 -Pcompile
+mvn package -Dnative=java11-amd64 -Pcompile
 ```
 
-or with dev mode activated:
-
-```bash.sh
-mvn clean install -Dnative=java11-amd64 -Pcompile,dev
-```
-
-###### In case the build is successful without dev mode activated
+###### In case the build is successful
 
 Excellent! The Native deployment package is in `target` folder with the name `[xxx]-aws-lambda-native.zip`.
 
+###### In case the build is not successful
 
-###### In case the build is successful with dev mode activated
+See why... it certainly means you need to complete the native-image configuration. see below the instructions for running the container for generating the configuration for you.
 
-Good ! At the end of the build, a container is running, letting you try your native lambda locally.
+##### Test your AWS Lambda Native Deployment Package
+
+* If you want to test the previous build and allow you to run some tests, use the profile `run`: `-Prun`
+
+```bash.sh
+mvn package -Dnative=java11-amd64 -Prun
+```
+
+Good ! At the end of this command, a container is running, letting you try your native lambda locally.
 
 It is a good time to run your tests on it:
 
@@ -193,19 +216,8 @@ It is a good time to run your tests on it:
 
 If it is working as expected, you are ready to deploy it to AWS!
 
-In another console, while the container is running, launch this command:
-
-```bash.sh
-mvn docker:copy -Dnative=java11-amd64 -Pcompile
-```
-
-This will copy the Native deployment package to the `target` folder with the name `[xxx]-aws-lambda-native.zip`.
-
 You can now stop the running container, with CTRL-C and are ready to upload your deployment package to AWS.
 
-###### In case the build is not successful
-
-See why... it certainly means you need to complete the native-image configuration. see below the instructions for running the container for generating the configuration for you.
 
 ##### AWS Initial Setup
 
@@ -251,7 +263,7 @@ Then Deploy your AWS Lambda Native Deployment Package
 #### AWS Lambda Native Compilation Configuration
 
 ```bash.sh
-mvn clean install -Dnative=java11-amd64 -Pconfig
+mvn package -Dnative=java11-amd64 -Pconfig
 ```
 
 At the end of the build, a container is running, letting you try your Java lambda locally with the [GraalVM Tracing Agent](https://www.graalvm.org/reference-manual/native-image/Agent/).
@@ -260,7 +272,9 @@ It is a good time to run your tests on it :
 
 > Run the Junit Tests in class in `[xxx].devops.LocalLambdaTests`
 
-The generated configuration is updated every 30s in folder: `src/main/resources/META-INF/native-image/[groupId]/[artifactId]/`.
+The generated configuration is updated every 30s in folder: `target/[artifactId]-[version]-native-config/java11-amd64/function/config/`.
+
+You can manually copy the files to the folder `src/main/resources/META-INF/native-image/[groupId]/[artifactId]/`.
 
 If necessary, update the file `native-image.properties`, stop the running container with CTRL-C and retry to compile.
 

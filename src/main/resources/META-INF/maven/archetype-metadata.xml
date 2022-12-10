@@ -15,7 +15,7 @@
   </requiredProperties>
 
     <fileSets>
-        <fileSet filtered="true" packaged="true">
+    	<fileSet filtered="true" packaged="true">
             <directory>src/main/java</directory>
         </fileSet>
         <fileSet filtered="true">
@@ -27,6 +27,13 @@
         <fileSet filtered="true">
             <directory>src/test/resources</directory>
         </fileSet>
+        <fileSet filtered="true">
+            <directory>src/assembly</directory>
+        </fileSet>
+        <fileSet filtered="true">
+            <directory>src/docker</directory>
+        </fileSet>
+                
         <fileSet filtered="true">
             <directory/>
             <includes>
