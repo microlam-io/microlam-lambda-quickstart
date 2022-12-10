@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.microlam</groupId>
     <artifactId>microlam</artifactId>
-    <version>0.5.2-SNAPSHOT</version>
+    <version>0.5.1</version>
   </parent>
 
   <artifactId>microlam-lambda-quickstart</artifactId>
