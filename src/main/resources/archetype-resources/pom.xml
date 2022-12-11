@@ -125,7 +125,7 @@
     <dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-aws-devops</artifactId>
-	  <version>0.7-SNAPSHOT</version>
+	  <version>0.7</version>
 	  <scope>test</scope>
     </dependency>
 
