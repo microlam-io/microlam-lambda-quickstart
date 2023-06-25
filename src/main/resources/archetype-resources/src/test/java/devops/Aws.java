@@ -3,15 +3,24 @@ package ${package}.devops;
 import io.microlam.aws.auth.AwsProfileRegionClientConfigurator;
 import software.amazon.awssdk.regions.Region;
 
-public class Aws {
+public enum Aws {
 	
-	public final static String PROFILE = "${awsProfile}";
-	public final static String REGION = "${awsRegion}";
-	public final static String DEPLOYMENT_BUCKET = "${awsBucket}";
+	PROD("${awsProfile}", "${awsRegion}", "${awsBucket}", true);
 	
-	public static void configure() {
-	   	AwsProfileRegionClientConfigurator.setProfile(PROFILE);
-	 	AwsProfileRegionClientConfigurator.setRegion(Region.of(REGION));
+	public final String profile;
+	public final String region;
+	public final String bucket;
+	public final boolean useS3TransferAcceleration;
+	
+	private Aws(String profile, String region, String bucket, boolean useS3TransferAcceleration) {
+		this.profile = profile;
+		this.region = region;
+		this.bucket = bucket;
+		this.useS3TransferAcceleration = useS3TransferAcceleration;
 	}
-
+	
+	public void configure() {
+	   	AwsProfileRegionClientConfigurator.setProfile(profile);
+	 	AwsProfileRegionClientConfigurator.setRegion(Region.of(region));
+	}
 }

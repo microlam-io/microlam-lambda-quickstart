@@ -1,4 +1,4 @@
-FROM ghcr.io/microlam-io/microlam-container-java${native.version}-graalvm${graalvm.version}:${container.tag}
+FROM ghcr.io/microlam-io/microlam-container-${container.suffix}:${container.tag}
 
 COPY function /function/
 WORKDIR /function

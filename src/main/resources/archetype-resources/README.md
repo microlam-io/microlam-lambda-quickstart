@@ -9,13 +9,11 @@ To use it:
 mvn archetype:generate -Dfilter=io.microlam:microlam-lambda-quickstart
 ```
 
-###### Warning: Don't forget the ':' at the end of the command!
-
 ## Answer all the questions
 
 1. Choose the the number corresponding to 'microlam-lambda-quickstart'
 2. Choose a `groupId`, `artifactId`, `version` and `package`.
-3. Choose your `awsBucket` : this is the name of an S3 bucket where the lambda artifacts will be deployed
+3. Choose your `awsBucket` : this is the name of an S3 bucket where the lambda artifacts will be deployed (new or existing bucket)
 4. Choose your `awsProfile` : this is the name of your AWS profile
 5. Choose your `awsRegion`: this is the name of an AWS region (ex: `eu-west-1`)
 6. Choose your `lambdaName`: this is the name of your Lambda must be also suitable as the name of the Java class for the Lambda.
@@ -50,12 +48,12 @@ The expected response will be a json of the form:
 
 The result will be the sum or the product of the arguments depending on the respective endpoints `/sum` or `/mult`.
 
-The project will generate a Java 11 lambda and also a Custom Runtime Lambda using [GraalVM](https://www.graalvm.org/) compilation of the same java code with [native-image](https://www.graalvm.org/reference-manual/native-image/).
+The project will generate a Java 17 lambda and also a Custom Runtime Lambda using [GraalVM](https://www.graalvm.org/) compilation of the same java code with [native-image](https://www.graalvm.org/reference-manual/native-image/).
 
 This project implements the Lambda code with the Microlam Simple architecture.
 
 
-#### AWS Lambda Java 11
+#### AWS Lambda Java 17
 
 ##### Build your AWS Lambda Java Deployment Package
 
@@ -109,14 +107,14 @@ Then Deploy your AWS Lambda Java Deployment Package:
 > Run the Junit Test in class in `[xxx].devops.UploadAndUpdateLambda`
 
 
-#### AWS Lambda Java 17 or Java 19
+#### AWS Lambda Java 20 or Java 19
 
-Currently AWS has no official support for Java 17/19 but a Custom Runtime is provided for both amd64 and arm64 as a [Lambda Layer for Java 17](https://github.com/microlam-io/lambda-java17-layer) or [Lambda Layer for Java 19](https://github.com/microlam-io/lambda-java19-layer).
+Currently AWS has no official support for Java 20/19 but a Custom Runtime is provided for both amd64 and arm64 as a [Lambda Layer for Java 20](https://github.com/microlam-io/lambda-java20-layer) or [Lambda Layer for Java 19](https://github.com/microlam-io/lambda-java19-layer).
 
 First modify the pom.xml property:
 
 ```pom.xml
-<release.version>17</release.version>
+<release.version>20</release.version>
 ```
 
 or
@@ -126,12 +124,12 @@ or
 ```
 
 
-Then ensure your build is using a JDK17+ or JDK19+.
+Then ensure your build is using a JDK20+ or JDK19+.
 
-##### Building and Bringing the Java 17/19 Layer
+##### Building and Bringing the Java 20/19 Layer
 
 ```bash.sh
-mvn package -Djava17layer=axx64
+mvn package -Djava20layer=axx64
 ```
 
 or 
@@ -143,12 +141,12 @@ mvn package -Djava19layer=axx64
 
 where ``axx64`` is ``amd64`` or ``arm64 ``.
 
-This brings the ``java 17 layer`` or ``java 19 layer`` in your ``target/`` folder.
+This brings the ``java 20 layer`` or ``java 19 layer`` in your ``target/`` folder.
 
 
-##### Deploying the Java 17/19 Layer
+##### Deploying the Java 20/19 Layer
 
-Using the CDK is the simplest way to deploy the Java 17/19 Layer (But using the AWS console is also possible).
+Using the CDK is the simplest way to deploy the Java 20/19 Layer (But using the AWS console is also possible).
 
 See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/test` folder).
 
@@ -178,18 +176,19 @@ See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/te
 </toolchains>
 ```
 
-* The native build is depending on the java version (`java11` or `java17`) and the target architecture (`amd64` or `arm64`).
+* The native build is depending on the java version (`java11` or `java17` or `java19` or `java20`) and the target architecture (`amd64` or `arm64`).
 You need to provide this information in maven command line using `-Dnative=javaXX-axx64` (by replacing XX and xx with the correct values)
 
 * You need to activate the profile `compile` with `-Pcompile`
 
+###### Note: For Java 17 and Java 20 you may use the (Oracle Graalvm Free version)[https://medium.com/graalvm/a-new-graalvm-release-and-new-free-license-4aab483692f5]  with the command `-Dnative=oracle-javaXX-axx64`.
 
 ##### Compile and Build your AWS Lambda Native Deployment Package
 
-In case you choose to build from `Java 11` targeting `amd64` architecture: 
+In case you choose to build from `Java 17` targeting `amd64` architecture: 
 
 ```bash.sh
-mvn package -Dnative=java11-amd64 -Pcompile
+mvn package -Dnative=java17-amd64 -Pcompile
 ```
 
 ###### In case the build is successful
@@ -205,7 +204,7 @@ See why... it certainly means you need to complete the native-image configuratio
 * If you want to test the previous build and allow you to run some tests, use the profile `run`: `-Prun`
 
 ```bash.sh
-mvn package -Dnative=java11-amd64 -Prun
+mvn package -Dnative=java17-amd64 -Prun
 ```
 
 Good ! At the end of this command, a container is running, letting you try your native lambda locally.
@@ -263,7 +262,7 @@ Then Deploy your AWS Lambda Native Deployment Package
 #### AWS Lambda Native Compilation Configuration
 
 ```bash.sh
-mvn package -Dnative=java11-amd64 -Pconfig
+mvn package -Dnative=java17-amd64 -Pconfig
 ```
 
 At the end of the build, a container is running, letting you try your Java lambda locally with the [GraalVM Tracing Agent](https://www.graalvm.org/reference-manual/native-image/Agent/).

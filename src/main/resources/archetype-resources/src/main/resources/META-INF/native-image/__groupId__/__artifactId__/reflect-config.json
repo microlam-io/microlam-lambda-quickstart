@@ -1,22 +1,5 @@
 [
 {
-  "name":"org.apache.geronimo.osgi.locator.ProviderLocator"
-},
-{
-  "name":"org.apache.johnzon.core.JsonProviderImpl",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
-  "name":"org.apache.johnzon.core.JsonReaderFactoryImpl",
-  "methods":[{"name":"createReader","parameterTypes":["javax.json.stream.JsonParser"] }]
-},
-{
-  "name":"${package}.bs.BusinessProcessorMult"}
-,
-{
-  "name":"${package}.bs.BusinessProcessorSum"}
-,
-{
   "name":"${package}.lambda.${lambdaName}",
   "methods":[{"name":"<init>","parameterTypes":[] }]}
 ,

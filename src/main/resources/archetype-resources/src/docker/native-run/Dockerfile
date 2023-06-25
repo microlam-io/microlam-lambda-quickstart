@@ -1,4 +1,4 @@
-FROM ghcr.io/microlam-io/microlam-container-java11-graalvm22.3.0:v22.3.0
+FROM ghcr.io/microlam-io/microlam-container-${container.suffix}:${container.tag}
 COPY function /function/
 WORKDIR /function
 RUN chmod +x func

@@ -3,11 +3,14 @@ package ${package}.devops.cdk;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Test;
 
 import io.microlam.aws.devops.StsUtils;
 import io.microlam.aws.devops.cdk.AbstractStack;
+import ${package}.devops.Aws;
+import ${package}.devops.PomProperties;
 import software.amazon.awscdk.App;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Environment;
@@ -15,18 +18,25 @@ import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.apigateway.EndpointConfiguration;
 import software.amazon.awscdk.services.apigateway.EndpointType;
 import software.amazon.awscdk.services.apigateway.LambdaIntegration;
+import software.amazon.awscdk.services.apigateway.Method;
 import software.amazon.awscdk.services.apigateway.RestApi;
+import software.amazon.awscdk.services.iam.Effect;
+import software.amazon.awscdk.services.iam.PolicyStatement;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
 import software.amazon.awscdk.services.lambda.Alias;
 import software.amazon.awscdk.services.lambda.Architecture;
 import software.amazon.awscdk.services.lambda.CfnFunction;
+import software.amazon.awscdk.services.lambda.CfnPermission;
+import software.amazon.awscdk.services.lambda.CfnFunction.SnapStartProperty;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.LayerVersion;
 import software.amazon.awscdk.services.lambda.LayerVersionProps;
-import software.amazon.awscdk.services.lambda.CfnFunction.SnapStartProperty;
+import software.amazon.awscdk.services.lambda.Permission;
 import software.amazon.awscdk.services.s3.Bucket;
+import software.amazon.awscdk.services.s3.IBucket;
+import software.amazon.awscdk.services.ssm.StringParameter;
 import software.constructs.Construct;
-import ${package}.devops.Aws;
 
 public class CreateApp {
 
@@ -39,17 +49,37 @@ public class CreateApp {
     
     @Test
     public void createApp() {
-    	Aws.configure();
+    	Aws aws = Aws.PROD;
+    	aws.configure();
+    	
+    	//Load pom properties
+    	PomProperties pom = PomProperties.load();
+
+    	String groupId = pom.groupId;    	
+    	String artifactId = pom.artifactId;
+    	String version = pom.version;
+    	String lambda = pom.lambda;
+    	String lambdaName = pom.lambdaName;
+    	int javaVersion = pom.javaVersion;
+    	
+    	System.out.println();
+    	System.out.println("groupId     = " + groupId);
+    	System.out.println("artifactId  = " + artifactId);
+    	System.out.println("version     = " + version);
+    	System.out.println("lambda      = " + lambda);
+    	System.out.println("lambdaName  = " + lambdaName);
+    	System.out.println("javaVersion = " + javaVersion);
+    	
         App app = new App();
 
         String account_id = StsUtils.getAccountId();
         
         Environment env = Environment.builder()
                 .account(account_id)
-                .region(Aws.REGION)
+                .region(aws.region)
                 .build();
         
-        new AbstractStack(app, "${artifactId}", 
+        new AbstractStack(app, artifactId, 
         		StackProps.builder().env(env).build()) {
 			
 			@Override
@@ -57,89 +87,143 @@ public class CreateApp {
 				
 				//Choose selected values
 				boolean java = true; // false = native compilation | true = java lambda
-				int version = 11; //Java version = 11 or 17 or 19 or 8
-				Architecture architecture = Architecture.X86_64; // Architecture.ARM_64 or Architecture.X86_64
+				Architecture architecture = Architecture.ARM_64; // Architecture.ARM_64 or Architecture.X86_64
 				
 				//Do not modify this
 				String arch = (architecture == Architecture.ARM_64)?"arm64":"amd64";
 				
-				Bucket bucket = new Bucket(this, Aws.DEPLOYMENT_BUCKET);
+				//Create deployment bucket
+				IBucket bucket = Bucket.Builder.create(this, aws.bucket)
+						.bucketName(aws.bucket)
+						.transferAcceleration(aws.useS3TransferAcceleration)
+						.build();
+
+//				//If you want to use an existing bucket
+//				IBucket bucket = Bucket.fromBucketName(this, aws.bucket, aws.bucket);
 				
-				//The Java 17/19 layer
+				//The Java layer
 				LayerVersion javalayer = null;
-				if (java && ((version == 17) || (version == 19))) {
-				  javalayer = new LayerVersion(this, "Java" + version + "Layer-"+ arch, LayerVersionProps.builder()
-				        .layerVersionName("Java" +  version +"Layer-" + arch)
-				        .description("Java "+ version + " " + arch)
+				if (java && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
+				  if ((javaVersion != 19) || (javaVersion != 20)) {
+					  throw new RuntimeException("No Java layer available for Java version " + javaVersion);
+				  }
+				  javalayer = new LayerVersion(this, "Java" + javaVersion + "Layer-"+ arch, LayerVersionProps.builder()
+				        .layerVersionName("Java" +  javaVersion +"Layer-" + arch)
+				        .description("Java "+ javaVersion + " " + arch)
 				        .compatibleRuntimes(Arrays.asList(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2))
-				        .code(Code.fromAsset("target/lambda-java"+ version + "-layer-" + ((version == 17)?"17.0.5.8.1_1":"19.0.1.10.1") + "-"+ arch + ".zip"))
+				        .code(Code.fromAsset("target/lambda-java"+ javaVersion + "-layer-" + ((javaVersion == 20)?"20.0.1.9.1":"19.0.2.7.1") + "-"+ arch + ".zip"))
 				        .build());
 				}
 				
 			    @SuppressWarnings("serial")
-				Function.Builder handlerBuilder = Function.Builder.create(this, "${lambdaName}")			    		  
-		               .functionName("${lambdaName}")
+				Function.Builder handlerBuilder = Function.Builder.create(this, lambda)			    		  
+		               .functionName(lambdaName)
 	               	   .architecture(architecture)
-		               .handler("${package}.lambda.${lambdaName}")
+		               .handler(lambda)
 		               .memorySize(512)
 		               .timeout(Duration.seconds(20))
 		               .environment(new HashMap<String, String>() {{
-		                  put("BUCKET", bucket.getBucketName());
+		                  put("BUCKET", aws.bucket);
 		               }});
 			    
 			    //Code
 			    if (java) {
-			    	handlerBuilder.code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda.zip"));
+			    	handlerBuilder.code(Code.fromAsset(String.format("target/%s-%s-aws-lambda.zip", artifactId, version)));
 			    }
 			    else { //Native
-			    	handlerBuilder.code(Code.fromAsset("target/${artifactId}-${version}-aws-lambda-native.zip"));			    	
+			    	handlerBuilder.code(Code.fromAsset(String.format("target/%s-%s-aws-lambda-native.zip", artifactId, version)));			    	
 			    }
 
 			    //Runtime
-			    if (java && (version == 8)) {
+			    if (java && (javaVersion == 8)) {
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_8_CORRETTO);
 			    }
-			    else if (java && (version == 11)) {
+			    else if (java && (javaVersion == 11)) {
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_11); 
 			    }
-			    else { //version = 17 or 19
+			    else if (java && (javaVersion == 17)) {
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_17); 
+			    }
+			    else { //version other
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2);
 			    }
 
-			    //Java 17/19 layer if necessary
-				if (java && ((version == 17) || (version == 19))) {
+			    //Java layer if necessary
+				if (java && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
 					handlerBuilder.layers(Collections.singletonList(javalayer));
 				}			    
 			    
 				Function handler =  handlerBuilder.build();
 				Alias alias = handler.addAlias("live");
 				
-		        if (java && (version == 11) && (architecture == Architecture.X86_64)) {
+		        if (java && ((javaVersion == 11)|| (javaVersion == 17)) && (architecture == Architecture.X86_64)) {
 			        // Currently the CDK has not delivered L2 support for SnapStart, need to use L1 support (see https://github.com/aws/aws-cdk/issues/23153)
 			        ((CfnFunction) handler.getNode().getDefaultChild()).setSnapStart(SnapStartProperty.builder().applyOn("PublishedVersions").build());
 		        }
+		        
+		        
 		       
 		        bucket.grantReadWrite(handler);
 		        
-		        RestApi api = RestApi.Builder.create(this, "${artifactId}-api")
-		                .restApiName("${artifactId}").description("${lambdaName} API.")
+		        RestApi api = RestApi.Builder.create(this, artifactId +"-api")
+		                .restApiName(artifactId).description(lambdaName + " API.")
 		                .endpointConfiguration(EndpointConfiguration.builder().types(Arrays.asList(EndpointType.REGIONAL)).build())
 		                .build();
 		        
-		        LambdaIntegration lambdaIntegration1 = LambdaIntegration.Builder.create(alias)
-		        		.proxy(true)
-		        		.allowTestInvoke(true)
-		        		.build();
-		        LambdaIntegration lambdaIntegration2 = LambdaIntegration.Builder.create(alias)
+		        LambdaIntegration lambdaIntegration = LambdaIntegration.Builder.create(alias)
 		        		.proxy(true)
 		        		.allowTestInvoke(true)
 		        		.build();
 
-		        api.getRoot().addResource("sum").addMethod("POST", lambdaIntegration1);
-		        api.getRoot().addResource("mult").addMethod("POST", lambdaIntegration2);
+		        //Give ApiGateway api permission to call Lambda (resource based)
+		        alias.addPermission("apigw-permissions", Permission.builder()
+		        		.principal(ServicePrincipal.Builder.create("apigateway.amazonaws.com").build())
+		        		.action("lambda:InvokeFunction")
+		        		.sourceArn(api.arnForExecuteApi())
+		        		.build());
+
+		        removePermissions(api.getRoot().addResource("sum").addMethod("POST", lambdaIntegration));
+		        removePermissions(api.getRoot().addResource("mult").addMethod("POST", lambdaIntegration));
+		        
+				StringParameter.Builder.create(this, String.format("/%s/DEBUG", artifactId))
+					.parameterName(String.format("/%s/DEBUG", artifactId))
+					.stringValue("false")
+				.build();
+
+				handler.addToRolePolicy(PolicyStatement.Builder.create()
+		        		.sid("SSM1")
+		        		.actions(List.of(  
+		        				"ssm:PutParameter",
+		                        "ssm:GetParametersByPath",
+		                        "ssm:GetParameters",
+		                        "ssm:GetParameter"))
+		        		.effect(Effect.ALLOW)
+		        		.resources(List.of( 
+		        				String.format("arn:aws:ssm:%s:%s:parameter/%s", aws.region, account_id, artifactId),
+		        				String.format("arn:aws:ssm:%s:%s:parameter/%s/*", aws.region, account_id, artifactId)
+		        			)
+		        		)
+		        		.build());
+				handler.addToRolePolicy(PolicyStatement.Builder.create()
+		        		.sid("SSM2")
+		        		.actions(List.of(  "ssm:DescribeParameters"))
+		        		.effect(Effect.ALLOW)
+		        		.resources(List.of( 
+		        				"*"
+		        			)
+		        		)
+		        		.build());
+
 			}
 		}; 
          
         app.synth();
     }
+    
+    //Without this method, one permission is added for each API call leading to a too big policy
+    //Instead we use a resource based policy on Lambda alowing every call from ApiGateway API (see apigw-permissions)
+    public static void removePermissions(Method method) {
+    	method.getNode().getChildren().stream().filter((c) -> (c instanceof CfnPermission)).forEach(p -> method.getNode().tryRemoveChild(p.getNode().getId()));
+    }
+
 }

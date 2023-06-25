@@ -1,9 +1,0 @@
-{
-  "resources":{
-  "includes":[
-    {
-      "pattern":"\\Qsimplelogger.properties\\E"
-    }
-  ]},
-  "bundles":[]
-}

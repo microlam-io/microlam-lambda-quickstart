@@ -9,17 +9,19 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
+import ${package}.devops.Aws;
 import ${package}.lambda.body.LambdaBodyOut;
 
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-
-
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 
 public class LambdaTest {
 
 	@Test
 	public void testSum() {
+		Aws aws = Aws.PROD;
+		aws.configure();
+
 		APIGatewayProxyRequestEvent apiGatewayProxyInputEvent = new APIGatewayProxyRequestEvent();
 		apiGatewayProxyInputEvent
 			.withIsBase64Encoded(false)
@@ -39,6 +41,9 @@ public class LambdaTest {
 
 	@Test
 	public void testMult() {
+		Aws aws = Aws.PROD;
+		aws.configure();
+
 		APIGatewayProxyRequestEvent apiGatewayProxyInputEvent = new APIGatewayProxyRequestEvent();
 		apiGatewayProxyInputEvent
 			.withIsBase64Encoded(false)

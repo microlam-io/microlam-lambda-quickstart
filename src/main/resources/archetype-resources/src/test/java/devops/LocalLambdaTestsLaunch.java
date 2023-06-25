@@ -12,11 +12,16 @@ import org.junit.Test;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 
 import io.microlam.aws.devops.LambdaUtils;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
+import jakarta.json.bind.Jsonb;
+import jakarta.json.bind.JsonbBuilder;
 import ${package}.lambda.body.LambdaBodyOut;
 
-public class LocalLambdaTests {
+/**
+ * Run from the console:
+ * 
+ * mvn -e -q compile test -Dtest=${package}.devops.LocalLambdaTestsLaunch
+ */
+public class LocalLambdaTestsLaunch {
 
 	@Test
 	public void test1() throws IOException {

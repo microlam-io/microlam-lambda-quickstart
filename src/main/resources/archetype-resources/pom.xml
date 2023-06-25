@@ -5,7 +5,7 @@
   <version>${version}</version>
   
  <properties>
-	<release.version>11</release.version>
+	<release.version>17</release.version>
 	<exec.mainClass>com.amazonaws.services.lambda.runtime.api.client.AWSLambda</exec.mainClass>
 	<lambda.handler>${package}.lambda.${lambdaName}</lambda.handler>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -13,6 +13,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <junit.version>4.12</junit.version>
     <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
+    <aws.profile>${awsProfile}</aws.profile>
   </properties>
 
 	<build>
@@ -21,7 +22,7 @@
 		  <plugin>
 	        <groupId>org.apache.maven.plugins</groupId>
 	        <artifactId>maven-compiler-plugin</artifactId>
-	        <version>3.10.1</version>
+	        <version>3.11.0</version>
 
 	        <configuration>
 			  <release>${release.version}</release>
@@ -46,10 +47,41 @@
 		                <mainClass>${exec.mainClass}</mainClass>
 		            </manifest>
 		        </archive>
+		        <forceCreation>true</forceCreation>
 		    </configuration>
 		</plugin>
 
-		</plugins>
+		 <!-- Necessary for generating pom.properties for tests and cdk --> 
+	      <plugin>
+	        <groupId>org.apache.maven.plugins</groupId>
+	        <artifactId>maven-resources-plugin</artifactId>
+	        <version>3.3.1</version>
+	        <configuration>
+			  <propertiesEncoding>UTF-8</propertiesEncoding>
+	          <!-- <propertiesEncoding>ISO-8859-1</propertiesEncoding> -->
+	        </configuration>
+	      </plugin>
+	      
+    	</plugins>
+    
+		<!-- Necessary for generating pom.properties for tests and cdk --> 
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+		        <includes>
+		            <include>**/pom.properties</include>
+		        </includes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+		        <excludes>
+		            <exclude>**/pom.properties</exclude>
+		        </excludes>
+            </testResource>
+        </testResources>
+
 	</build>
 
 
@@ -59,7 +91,7 @@
 	<dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-bom</artifactId>
-      <version>0.5.1</version>
+      <version>0.5.3</version>
       <type>pom</type>
       <scope>import</scope>
     </dependency>
@@ -68,38 +100,154 @@
   </dependencyManagement>
 
   <dependencies>
-  
+ 
+     <dependency>
+      	<groupId>software.amazon.awssdk</groupId>
+      	<artifactId>aws-core</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
+     </dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>regions</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
+	</dependency>
+
+	<dependency>
+        <groupId>software.amazon.awssdk</groupId>
+    	<artifactId>auth</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
+	</dependency>
+
+	<dependency>
+	  	<groupId>software.amazon.awssdk</groupId>
+	  	<artifactId>ssm</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
+	 </dependency>
+
+	<dependency>
+    	<groupId>software.amazon.awssdk</groupId>
+    	<artifactId>url-connection-client</artifactId>
+    	<scope>runtime</scope>
+	</dependency>
+
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-lambda-java-events</artifactId>
+   </dependency>
+
     <dependency>
 	  <groupId>io.microlam</groupId>
   	  <artifactId>microlam-aws-lambda</artifactId>
 	</dependency>
-  
-    <dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-json_1.1_spec</artifactId>
-    </dependency>
 
-   	<dependency>
-	    <groupId>org.apache.johnzon</groupId>
-	    <artifactId>johnzon-jsonb</artifactId>
+    <dependency>
+	  <groupId>io.microlam</groupId>
+  	  <artifactId>microlam-aws-auth</artifactId>
+	</dependency>
+
+    <dependency>
+	  <groupId>io.microlam</groupId>
+  	  <artifactId>microlam-params</artifactId>
+	</dependency>
+ 
+     <dependency>
+	  <groupId>io.microlam</groupId>
+  	  <artifactId>microlam-params-aws</artifactId>
+	</dependency>
+ 
+  	<dependency>
+	    <groupId>jakarta.json</groupId>
+	    <artifactId>jakarta.json-api</artifactId>
 	</dependency>
 
 	<dependency>
-        <groupId>org.apache.geronimo.specs</groupId>
-        <artifactId>geronimo-jsonb_1.0_spec</artifactId>
+	    <groupId>org.eclipse.parsson</groupId>
+	    <artifactId>parsson</artifactId>
+	</dependency>  
+
+    <dependency>
+        <groupId>jakarta.json.bind</groupId>
+        <artifactId>jakarta.json.bind-api</artifactId>
     </dependency>
-  
+
+   	<dependency>
+        <groupId>org.eclipse</groupId>
+	    <artifactId>yasson</artifactId>
+	</dependency>
+
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
     </dependency>
     
+    <dependency> 
+	  <groupId>org.slf4j</groupId>
+	  <artifactId>slf4j-jdk14</artifactId>
+	</dependency>
+
     <dependency>
     	<groupId>io.microlam</groupId>
-    	<artifactId>slf4j-simple-lambda</artifactId>
+    	<artifactId>microlam-java-logging</artifactId>
 	</dependency>
-      
-<!--      
+
+    <dependency>
+    	<groupId>io.microlam</groupId>
+    	<artifactId>microlam-json</artifactId>
+	</dependency>
+    
  	<dependency>
  		<groupId>org.slf4j</groupId>
  		<artifactId>log4j-over-slf4j</artifactId>
@@ -110,64 +258,96 @@
 	    <artifactId>log4j-api</artifactId>
 	</dependency>
 
--->    
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-lambda-java-core</artifactId>
       <scope>provided</scope>
     </dependency>
-    
-    <dependency>
-      <groupId>com.amazonaws</groupId>
-      <artifactId>aws-lambda-java-events</artifactId>
-   </dependency>
-    
+
     <dependency>
       <groupId>io.microlam</groupId>
       <artifactId>microlam-aws-devops</artifactId>
-	  <version>0.7</version>
+	  <version>0.9</version>
 	  <scope>test</scope>
     </dependency>
 
 	<dependency>
         <groupId>software.amazon.awssdk</groupId>
-    	<artifactId>auth</artifactId>
-        <scope>test</scope>
-	</dependency>
-
-	<dependency>
-        <groupId>software.amazon.awssdk</groupId>
-    	<artifactId>aws-core</artifactId>
-        <scope>test</scope>
-	</dependency>
-
-	<dependency>
-        <groupId>software.amazon.awssdk</groupId>
-    	<artifactId>regions</artifactId>
-        <scope>test</scope>
-	</dependency>
-
-	<dependency>
-        <groupId>software.amazon.awssdk</groupId>
     	<artifactId>s3</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
         <scope>test</scope>
 	</dependency>
 
 	<dependency>
         <groupId>software.amazon.awssdk</groupId>
     	<artifactId>lambda</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
         <scope>test</scope>
 	</dependency>
 
 	<dependency>
         <groupId>software.amazon.awssdk</groupId>
     	<artifactId>apigateway</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
         <scope>test</scope>
 	</dependency>
 
 	<dependency>
         <groupId>software.amazon.awssdk</groupId>
     	<artifactId>sts</artifactId>
+ 	  	<exclusions>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>apache-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>software.amazon.awssdk</groupId>
+	            <artifactId>netty-nio-client</artifactId>
+	        </exclusion>
+	        <exclusion>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>slf4j-api</artifactId>
+	        </exclusion>	        
+    	</exclusions>
         <scope>test</scope>
 	</dependency>
 
@@ -188,7 +368,7 @@
 		<artifactId>junit</artifactId>
 		<scope>test</scope>
 	</dependency>
-
+	
   </dependencies>
 
     <profiles>
@@ -232,16 +412,16 @@
      </profile>
 
       <profile>
-        <id>java17layer</id>
+        <id>java20layer</id>
         <activation>
-			<property><name>java17layer</name></property>
+			<property><name>java20layer</name></property>
        </activation>
 			<build>
 				<plugins>
 					<plugin>
 				        <groupId>org.apache.maven.plugins</groupId>
 				        <artifactId>maven-dependency-plugin</artifactId>
-				        <version>3.3.0</version>
+				        <version>3.6.0</version>
 				        <executions>
 				          <execution>
 				            <id>copy</id>
@@ -255,9 +435,9 @@
 				          <artifactItems>
 				            <artifactItem>
 				              <groupId>io.microlam</groupId>
-				              <artifactId>lambda-java17-layer</artifactId>
-				              <version>17.0.5.8.1_1</version>
-							  <classifier>${java17layer.arch}</classifier>
+				              <artifactId>lambda-java20-layer</artifactId>
+				              <version>20.0.1.9.1</version>
+							  <classifier>${java20layer.arch}</classifier>
 				              <type>zip</type>
 				            </artifactItem>
 				          </artifactItems>
@@ -271,34 +451,34 @@
 	</profile>
 
       <profile>
-        <id>java17layer-amd64</id>
+        <id>java20layer-amd64</id>
         <activation>
 			<property>
-				<name>java17layer</name>
+				<name>java20layer</name>
 				<value>amd64</value>
 			</property>
        </activation>
 
 		<properties>
-			<java17layer.arch>amd64</java17layer.arch>
+			<java20layer.arch>amd64</java20layer.arch>
 		</properties>
 	  </profile>
 
       <profile>
-        <id>java17layer-arm64</id>
+        <id>java20layer-arm64</id>
         <activation>
 			<property>
-				<name>java17layer</name>
+				<name>java20layer</name>
 				<value>arm64</value>
 			</property>
        </activation>
 
 		<properties>
-			<java17layer.arch>arm64</java17layer.arch>
+			<java20layer.arch>arm64</java20layer.arch>
 		</properties>
 	  </profile>
 
-      <profile>
+       <profile>
         <id>java19layer</id>
         <activation>
 			<property><name>java19layer</name></property>
@@ -308,7 +488,7 @@
 					<plugin>
 				        <groupId>org.apache.maven.plugins</groupId>
 				        <artifactId>maven-dependency-plugin</artifactId>
-				        <version>3.3.0</version>
+				        <version>3.6.0</version>
 				        <executions>
 				          <execution>
 				            <id>copy</id>
@@ -323,7 +503,7 @@
 				            <artifactItem>
 				              <groupId>io.microlam</groupId>
 				              <artifactId>lambda-java19-layer</artifactId>
-				              <version>19.0.1.10.1</version>
+				              <version>19.0.2.7.1</version>
 							  <classifier>${java19layer.arch}</classifier>
 				              <type>zip</type>
 				            </artifactItem>
@@ -364,8 +544,8 @@
 			<java19layer.arch>arm64</java19layer.arch>
 		</properties>
 	  </profile>
-
-	  <profile>
+	  
+  <profile>
         <id>native-java11-amd64</id>
         <activation>
  		  <property>
@@ -377,8 +557,8 @@
 		<properties>
 			<native.version>11</native.version>
 			<native.arch>amd64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>java11-graalvm22.3.2</container.suffix>
+			<container.tag>v6</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>--add-opens java.base/java.util=ALL-UNNAMED</native.image.arguments>
 		</properties>
@@ -395,8 +575,8 @@
 		<properties>
 			<native.version>11</native.version>
 			<native.arch>arm64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>java11-graalvm22.3.2</container.suffix>
+			<container.tag>v6</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -413,8 +593,44 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>amd64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>jdk17.0.7</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments></native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-oracle-java17-arm64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>oracle-java17-arm64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>17</native.version>
+			<native.arch>arm64</native.arch>
+			<container.suffix>oracle-jdk17.0.7</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-oracle-java17-amd64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>oracle-java17-amd64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>17</native.version>
+			<native.arch>amd64</native.arch>
+			<container.suffix>oracle-jdk17.0.7</container.suffix>
+			<container.tag>v7</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -431,8 +647,8 @@
 		<properties>
 			<native.version>17</native.version>
 			<native.arch>arm64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>jdk17.0.7</container.suffix>
+			<container.tag>v7</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
@@ -449,8 +665,8 @@
 		<properties>
 			<native.version>19</native.version>
 			<native.arch>amd64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>java19-graalvm22.3.1</container.suffix>
+			<container.tag>v7</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments></native.image.arguments>
 		</properties>
@@ -467,13 +683,87 @@
 		<properties>
 			<native.version>19</native.version>
 			<native.arch>arm64</native.arch>
-			<graalvm.version>22.3.0</graalvm.version>
-			<container.tag>v22.3.0</container.tag>
+			<container.suffix>java19-graalvm22.3.1</container.suffix>
+			<container.tag>v7</container.tag>
 			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
 			<native.image.arguments>-Djdk.lang.Process.launchMechanism=vfork</native.image.arguments>
 		</properties>
 	  </profile>
 
+	  <profile>
+        <id>native-java20-amd64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>java20-amd64</value>
+		 </property>
+        </activation>
+
+		<properties>
+			<native.version>20</native.version>
+			<native.arch>amd64</native.arch>
+			<container.suffix>jdk20.0.1</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments>--add-opens java.base/java.util=ALL-UNNAMED</native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-java20-arm64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>java20-arm64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>20</native.version>
+			<native.arch>arm64</native.arch>
+			<container.suffix>jdk20.0.1</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments></native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-oracle-java20-amd64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>oracle-java20-amd64</value>
+		 </property>
+        </activation>
+
+		<properties>
+			<native.version>20</native.version>
+			<native.arch>amd64</native.arch>
+			<container.suffix>oracle-jdk20.0.1</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments>--add-opens java.base/java.util=ALL-UNNAMED</native.image.arguments>
+		</properties>
+	  </profile>
+
+	  <profile>
+        <id>native-oracle-java20-arm64</id>
+        <activation>
+ 		  <property>
+			<name>native</name>
+			<value>oracle-java20-arm64</value>
+		 </property>
+        </activation>
+		<properties>
+			<native.version>20</native.version>
+			<native.arch>arm64</native.arch>
+			<container.suffix>oracle-jdk20.0.1</container.suffix>
+			<container.tag>v7</container.tag>
+			<config.entryPoint.arguments>--add-opens java.base/java.util=ALL-UNNAMED</config.entryPoint.arguments>
+			<native.image.arguments></native.image.arguments>
+		</properties>
+	  </profile>
+	  
       <profile>
         <id>native</id>
         <activation>
@@ -490,14 +780,14 @@
 			<dependency>
 			    <groupId>com.amazonaws</groupId>
 			    <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
-			    <version>2.1.1</version>
+			    <version>2.3.2</version>
 			</dependency>
 
 			<dependency>
 			    <groupId>io.microlam</groupId>
 				<artifactId>aws-lambda-java-runtime-interface-client-native-config</artifactId>
-				<classifier>java${native.version}</classifier>
-				<version>2.1.1_1</version>
+				<version>2.3.2_1</version>
+				<classifier>java${release.version}</classifier>
 			</dependency>
 
 		</dependencies>
@@ -514,7 +804,7 @@
 	
 				<plugin>
 			        <artifactId>maven-assembly-plugin</artifactId>
-			        <version>3.3.0</version>
+			        <version>3.4.0</version>
 			        <configuration>
 			          <descriptors>
 			            <descriptor>src/assembly/native-config.xml</descriptor>
@@ -549,7 +839,7 @@
 			              <echos>
 			                <echo>Now you are ready to configure your native compilation with:</echo>
 			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch} -t ${project.artifactId}-config:latest</echo>
-			                <echo>STEP 2: docker run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</echo>
+			                <echo>STEP 2: docker run -e AWS_PROFILE=${aws.profile} --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</echo>
 			                <echo>STEP 3: Execute your tests against your implementation, using LocalLambdaTests or curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'</echo>
 			                <echo>STEP 4: Find the generated configuration files in ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config</echo>
 			              </echos>
@@ -602,7 +892,7 @@
 			              <goal>exec</goal>
 			            </goals>
 			            <configuration>
-							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</commandlineArgs>	
+							<commandlineArgs>run -e AWS_PROFILE=${aws.profile} --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config:/function/config --name ${project.artifactId}-${project.version}-native-config-${maven.build.timestamp} ${project.artifactId}-config:latest</commandlineArgs>	
 			            </configuration>
 			          </execution>
 			        </executions> 
@@ -665,7 +955,7 @@
 			              <echos>
 			                <echo>Now you are ready to configure your native compilation with:</echo>
 			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch} -t ${project.artifactId}:latest</echo>
-			                <echo>STEP 2: docker run --attach STDOUT -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}:/function --name ${project.artifactId}-${project.version}-native-compile-${maven.build.timestamp} ${project.artifactId}:latest</echo>
+			                <echo>STEP 2: docker run -e AWS_PROFILE=${aws.profile} --attach STDOUT -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}:/function --name ${project.artifactId}-${project.version}-native-compile-${maven.build.timestamp} ${project.artifactId}:latest</echo>
 			              </echos>
 			            </configuration>
 			          </execution>
@@ -715,7 +1005,7 @@
 			              <goal>exec</goal>
 			            </goals>
 			            <configuration>
-							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}/function/out:/function/out ${project.artifactId}:latest</commandlineArgs>	
+							<commandlineArgs>run -e AWS_PROFILE=${aws.profile} --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials -v ${project.build.directory}/${project.artifactId}-${project.version}-native-compile/java${native.version}-${native.arch}/function/out:/function/out ${project.artifactId}:latest</commandlineArgs>	
 			            </configuration>
 			          </execution>
 			          <execution>
@@ -835,7 +1125,7 @@
 			              <echos>
 			                <echo>Now you are ready to run your native compilation with:</echo>
 			                <echo>STEP 1: docker build --platform linux/${native.arch} ${project.build.directory}/${project.artifactId}-${project.version}-native-run/java${native.version}-${native.arch} -t ${project.artifactId}-run:latest</echo>
-			                <echo>STEP 2: docker run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</echo>
+			                <echo>STEP 2: docker run -e AWS_PROFILE=${aws.profile}  --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</echo>
 			                <echo>STEP 3: Execute your tests against your implementation, using LocalLambdaTests or curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'</echo>
 			                <echo>STEP 4: Find the generated configuration files in ${project.build.directory}/${project.artifactId}-${project.version}-native-config/java${native.version}-${native.arch}/function/config</echo>
 			              </echos>
@@ -887,7 +1177,7 @@
 			              <goal>exec</goal>
 			            </goals>
 			            <configuration>
-							<commandlineArgs>run --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</commandlineArgs>	
+							<commandlineArgs>run -e AWS_PROFILE=${aws.profile} --rm -p 9000:8080 -v ${user.home}/.aws/credentials:/root/.aws/credentials --name ${project.artifactId}-${project.version}-native-run-${maven.build.timestamp} ${project.artifactId}-run:latest</commandlineArgs>	
 			            </configuration>
 			          </execution>
 			        </executions> 
@@ -902,5 +1192,5 @@
 			</plugins>
 		</build>
       </profile>
-    </profiles>
+   </profiles>
 </project>
