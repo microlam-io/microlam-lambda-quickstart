@@ -2,7 +2,8 @@ package ${package}.params;
 
 import io.microlam.utils.params.AttributesProvider;
 import io.microlam.utils.params.aws.AttributesProviderPathService;
-import tech.solusoft.aws.AwsClients;
+
+import ${package}.aws.AwsClients;
 
 public class SystemParameters {
 
