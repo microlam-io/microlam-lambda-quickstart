@@ -11,7 +11,7 @@ public class SystemParameters {
 
 	public static AttributesProvider load() {
 		if (instance == null) {
-			instance = AttributesProviderPathService.createAtributesProvider("/${artifactId}", 5*60*1000l /* 5 min */, AwsClients.getSsmClient()););
+			instance = AttributesProviderPathService.createAtributesProvider("/${artifactId}", 5*60*1000l /* 5 min */, AwsClients.getSsmClient());
 		}
 		return instance;
 	}
