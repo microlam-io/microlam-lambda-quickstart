@@ -25,14 +25,13 @@ import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.iam.ServicePrincipal;
 import software.amazon.awscdk.services.lambda.Alias;
 import software.amazon.awscdk.services.lambda.Architecture;
-import software.amazon.awscdk.services.lambda.CfnFunction;
 import software.amazon.awscdk.services.lambda.CfnPermission;
-import software.amazon.awscdk.services.lambda.CfnFunction.SnapStartProperty;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
 import software.amazon.awscdk.services.lambda.LayerVersion;
 import software.amazon.awscdk.services.lambda.LayerVersionProps;
 import software.amazon.awscdk.services.lambda.Permission;
+import software.amazon.awscdk.services.lambda.SnapStartConf;
 import software.amazon.awscdk.services.s3.Bucket;
 import software.amazon.awscdk.services.s3.IBucket;
 import software.amazon.awscdk.services.ssm.StringParameter;
@@ -103,7 +102,7 @@ public class CreateApp {
 				
 				//The Java layer
 				LayerVersion javalayer = null;
-				if (java && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
+				if (java && (javaVersion != 21) && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
 				  if ((javaVersion != 19) || (javaVersion != 20)) {
 					  throw new RuntimeException("No Java layer available for Java version " + javaVersion);
 				  }
@@ -144,24 +143,24 @@ public class CreateApp {
 			    else if (java && (javaVersion == 17)) {
 			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_17); 
 			    }
+			    else if (java && (javaVersion == 21)) {
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.JAVA_21); 
+			    }
 			    else { //version other
-			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2);
+			    	handlerBuilder.runtime(software.amazon.awscdk.services.lambda.Runtime.PROVIDED_AL2023);
 			    }
 
 			    //Java layer if necessary
-				if (java && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
+				if (java && (javaVersion != 21) && (javaVersion != 17) && (javaVersion != 11) && (javaVersion != 8)) {
 					handlerBuilder.layers(Collections.singletonList(javalayer));
-				}			    
-			    
-				Function handler =  handlerBuilder.build();
-				Alias alias = handler.addAlias("live");
-				
-		        if (java && ((javaVersion == 11)|| (javaVersion == 17)) && (architecture == Architecture.X86_64)) {
-			        // Currently the CDK has not delivered L2 support for SnapStart, need to use L1 support (see https://github.com/aws/aws-cdk/issues/23153)
-			        ((CfnFunction) handler.getNode().getDefaultChild()).setSnapStart(SnapStartProperty.builder().applyOn("PublishedVersions").build());
+				}
+			    				
+		        if (java && ((javaVersion == 21) || (javaVersion == 17) || (javaVersion == 11)) && (architecture == Architecture.X86_64)) {
+			    	handlerBuilder.snapStart(SnapStartConf.ON_PUBLISHED_VERSIONS);
 		        }
 		        
-		        
+				Function handler =  handlerBuilder.build();
+				Alias alias = handler.addAlias("live");
 		       
 		        bucket.grantReadWrite(handler);
 		        

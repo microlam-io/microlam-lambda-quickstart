@@ -4,11 +4,11 @@
   <parent>
     <groupId>io.microlam</groupId>
     <artifactId>microlam</artifactId>
-    <version>0.5.3</version>
+    <version>0.6.4</version>
   </parent>
 
   <artifactId>microlam-lambda-quickstart</artifactId>
-  <version>0.9.7</version>
+  <version>0.9.11</version>
   <packaging>maven-archetype</packaging>
 
   <name>Maven Archetype for microlam-lambda-quickstart</name>
@@ -68,7 +68,7 @@
       <extension>
         <groupId>org.apache.maven.archetype</groupId>
         <artifactId>archetype-packaging</artifactId>
-        <version>3.2.1</version>
+        <version>3.3.1</version>
       </extension>
     </extensions>
 

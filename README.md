@@ -48,12 +48,12 @@ The expected response will be a json of the form:
 
 The result will be the sum or the product of the arguments depending on the respective endpoints `/sum` or `/mult`.
 
-The project will generate a Java 17 lambda and also a Custom Runtime Lambda using [GraalVM](https://www.graalvm.org/) compilation of the same java code with [native-image](https://www.graalvm.org/reference-manual/native-image/).
+The project will generate a Java 21 lambda and also a Custom Runtime Lambda using [GraalVM](https://www.graalvm.org/) compilation of the same java code with [native-image](https://www.graalvm.org/reference-manual/native-image/).
 
 This project implements the Lambda code with the Microlam Simple architecture.
 
 
-#### AWS Lambda Java 17
+#### AWS Lambda Java 21
 
 ##### Build your AWS Lambda Java Deployment Package
 
@@ -97,7 +97,7 @@ sam deploy
 ###### Create your AWS Lambda manually via the AWS Console
 
 * Using the `profile`, `region` and `lambdaName` you specified.
-* Using the Java 11 (Corretto) Lambda Runtime
+* Using the Java 21 (Corretto) Lambda Runtime
 * Set the handler to `[package].lambda.[lambdaName]`
 * Create the API in API Gateway as described before in the Project Description
 
@@ -176,19 +176,19 @@ See and update as necessary the Class `[xxx].devops.cdk.CreateApp` (from `src/te
 </toolchains>
 ```
 
-* The native build is depending on the java version (`java11` or `java17` or `java19` or `java20`) and the target architecture (`amd64` or `arm64`).
+* The native build is depending on the java version (`java11` or `java17` or `java19` or `java20` or `java21`) and the target architecture (`amd64` or `arm64`).
 You need to provide this information in maven command line using `-Dnative=javaXX-axx64` (by replacing XX and xx with the correct values)
 
 * You need to activate the profile `compile` with `-Pcompile`
 
-###### Note: For Java 17 and Java 20 you may use the (Oracle Graalvm Free version)[https://medium.com/graalvm/a-new-graalvm-release-and-new-free-license-4aab483692f5]  with the command `-Dnative=oracle-javaXX-axx64`.
+###### Note: For Java 21, 17 and Java 20 you may use the (Oracle Graalvm Free version)[https://medium.com/graalvm/a-new-graalvm-release-and-new-free-license-4aab483692f5]  with the command `-Dnative=oracle-javaXX-axx64`.
 
 ##### Compile and Build your AWS Lambda Native Deployment Package
 
-In case you choose to build from `Java 17` targeting `amd64` architecture: 
+In case you choose to build from `Java 21` targeting `amd64` architecture: 
 
 ```bash.sh
-mvn package -Dnative=java17-amd64 -Pcompile
+mvn package -Dnative=java21-amd64 -Pcompile
 ```
 
 ###### In case the build is successful
@@ -204,7 +204,7 @@ See why... it certainly means you need to complete the native-image configuratio
 * If you want to test the previous build and allow you to run some tests, use the profile `run`: `-Prun`
 
 ```bash.sh
-mvn package -Dnative=java17-amd64 -Prun
+mvn package -Dnative=java21-amd64 -Prun
 ```
 
 Good ! At the end of this command, a container is running, letting you try your native lambda locally.
@@ -262,7 +262,7 @@ Then Deploy your AWS Lambda Native Deployment Package
 #### AWS Lambda Native Compilation Configuration
 
 ```bash.sh
-mvn package -Dnative=java17-amd64 -Pconfig
+mvn package -Dnative=java21-amd64 -Pconfig
 ```
 
 At the end of the build, a container is running, letting you try your Java lambda locally with the [GraalVM Tracing Agent](https://www.graalvm.org/reference-manual/native-image/Agent/).
